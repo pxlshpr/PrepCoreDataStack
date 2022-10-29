@@ -36,11 +36,11 @@ extension FoodFormManager {
     }
     
     func jsonUrl(for uuid: UUID) throws -> URL? {
-        try url(at: jsonsUrl, for: uuid, ext: ".json")
+        try url(at: jsonsUrl, for: uuid, ext: "json")
     }
     
     func imageUrl(for uuid: UUID) throws -> URL? {
-        try url(at: imagesUrl, for: uuid, ext: ".jpg")
+        try url(at: imagesUrl, for: uuid, ext: "jpg")
     }
     
     func directoryExists(at url: URL) -> Bool {
