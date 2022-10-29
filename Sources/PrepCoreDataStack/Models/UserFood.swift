@@ -49,8 +49,8 @@ public extension UserFood {
     }
     
     //MARK: UserFoodCreateForm → UserFood
-    init(from form: UserFoodCreateForm) {
-        self.id = UUID()
+    init(from form: UserFoodCreateForm, id: UUID) {
+        self.id = id
         self.name = form.name
         self.emoji = form.emoji
         self.detail = form.detail

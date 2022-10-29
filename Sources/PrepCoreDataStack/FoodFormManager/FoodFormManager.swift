@@ -31,20 +31,25 @@ public class FoodFormManager {
             
             for (uuid, image) in formOutput.images {
                 /// Add the task to persist the image to disk
-                group.addTask { return await self.persistImage(image, with: uuid) }
+                group.addTask {
+                    return await self.persistImage(image, with: uuid)
+                }
                 
                 /// Add the task to save the `UserFoodImageEntity`
-                group.addTask { return await self.saveUserFoodImageEntity(for: uuid) }
+                group.addTask {
+                    return await self.saveImageFileEntity(for: uuid)
+                }
             }
 
             /// Add the task to persist the json data to disk
-            group.addTask { return await self.persistJSONData(formOutput.fieldsAndSourcesJSONData, for: foodId) }
+            group.addTask {
+                return await self.persistJSONData(formOutput.fieldsAndSourcesJSONData, for: foodId)
+            }
             
-            /// Add the task to save the `UserFoodJSONDataEntity`
-            group.addTask { return await self.saveUserFoodJSONDataEntity() }
-
             /// Add the task to save the `UserFoodEntity`
-            group.addTask { return await self.saveUserFoodEntity() }
+            group.addTask {
+                return await self.saveUserFoodEntity(formOutput.createForm, uuid: foodId)
+            }
 
             let start = CFAbsoluteTimeGetCurrent()
             
@@ -53,36 +58,11 @@ public class FoodFormManager {
                 case .success(let step):
                     print("✨ Step: \(step) completed in \(CFAbsoluteTimeGetCurrent()-start)s")
                 case .failure(let error):
-                    if case .unhandledError(let step) = error {
-                        print("⚠️ Error in step: \(step) after \(CFAbsoluteTimeGetCurrent()-start)s: \(error)")
-                    } else {
-                        print("⛔️ Unknowing error: \(error)")
-                    }
+                    print("⚠️ Error: \(error)")
                 }
             }
             
             print("✅ All steps completed in \(CFAbsoluteTimeGetCurrent()-start)s")
         }
     }
-    
-    func saveUserFoodEntity() async -> Result<FoodSaveStep, FoodSaveError> {
-        return Result.success(.saveUserFoodEntity)
-    }
-    
-    func saveUserFoodImageEntity(for uuid: UUID) async -> Result<FoodSaveStep, FoodSaveError> {
-        return Result.success(.saveUserFoodImageEntity(uuid))
-    }
-
-    func saveUserFoodJSONDataEntity() async -> Result<FoodSaveStep, FoodSaveError> {
-        return Result.success(.saveUserFoodJSONEntity)
-    }
-
-}
-
-public func sleepTask(_ seconds: Double, tolerance: Double = 1) async throws {
-    try await Task.sleep(
-        until: .now + .seconds(seconds),
-        tolerance: .seconds(tolerance),
-        clock: .suspending
-    )
 }

@@ -8,7 +8,8 @@ public class DataManager: ObservableObject {
     let coreDataManager: CoreDataManager
     
     @Published private(set) public var userFoods: [UserFood]
-    
+    @Published private(set) public var imageFiles: [ImageFile]
+
     convenience init() {
         self.init(coreDataManager: CoreDataManager())
     }
@@ -19,8 +20,12 @@ public class DataManager: ObservableObject {
             self.userFoods = try self.coreDataManager.userFoods().map {
                 return UserFood(from: $0)
             }
+            self.imageFiles = try self.coreDataManager.imageFiles().map {
+                return ImageFile(from: $0)
+            }
         } catch {
             self.userFoods = []
+            self.imageFiles = []
         }
     }
     
@@ -29,10 +34,23 @@ public class DataManager: ObservableObject {
         try self.coreDataManager.saveUserFood(entity: entity)
         try refresh()
     }
-    
+
+    public func save(imageFile: ImageFile) throws {
+        let entity = ImageFileEntity(context: self.coreDataManager.viewContext, imageFile: imageFile)
+        try self.coreDataManager.saveImageFile(entity: entity)
+        try refresh()
+    }
+
     public func refresh() throws {
-        self.userFoods = try self.coreDataManager.userFoods().map {
+        let userFoods = try self.coreDataManager.userFoods().map {
             return UserFood(from: $0)
+        }
+        let imageFiles = try self.coreDataManager.imageFiles().map {
+            return ImageFile(from: $0)
+        }
+        DispatchQueue.main.async {
+            self.userFoods = userFoods
+            self.imageFiles = imageFiles
         }
     }
 }

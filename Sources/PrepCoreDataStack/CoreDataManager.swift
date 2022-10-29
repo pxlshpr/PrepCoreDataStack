@@ -22,6 +22,7 @@ class CoreDataManager: NSPersistentContainer {
         }
     }
     
+    //MARK: UserFood
     func userFoods() throws -> [UserFoodEntity] {
         let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFoodEntity")
         return try self.viewContext.fetch(fetchRequest)
@@ -32,4 +33,14 @@ class CoreDataManager: NSPersistentContainer {
         try self.viewContext.save()
     }
     
+    //MARK: ImageFile
+    func imageFiles() throws -> [ImageFileEntity] {
+        let fetchRequest = NSFetchRequest<ImageFileEntity>(entityName: "ImageFileEntity")
+        return try self.viewContext.fetch(fetchRequest)
+    }
+    
+    func saveImageFile(entity: ImageFileEntity) throws {
+        self.viewContext.insert(entity)
+        try self.viewContext.save()
+    }
 }
