@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "prepdatatypes",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepDataTypes",
+      "state" : {
+        "revision" : "92ddc3f87872f8954992fbc0dc7b424e20473601",
+        "version" : "0.0.24"
+      }
+    },
+    {
+      "identity" : "swiftsugar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/SwiftSugar",
+      "state" : {
+        "revision" : "8f6e2615bee4969dd629c09cae9d900b52081b02",
+        "version" : "0.0.74"
+      }
+    }
+  ],
+  "version" : 2
+}

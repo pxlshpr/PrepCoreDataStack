@@ -23,7 +23,7 @@ class CoreDataManager: NSPersistentContainer {
     }
     
     func userFoods() throws -> [UserFoodEntity] {
-        let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFood")
+        let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFoodEntity")
         return try self.viewContext.fetch(fetchRequest)
     }
     
