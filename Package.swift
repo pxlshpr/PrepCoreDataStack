@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "PrepCoreDataStack",
     platforms: [
-        .iOS(.v15)
+        .iOS(.v16)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -15,7 +15,7 @@ let package = Package(
             targets: ["PrepCoreDataStack"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.22"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.25"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
