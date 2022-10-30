@@ -49,8 +49,8 @@ public extension UserFood {
     }
     
     //MARK: UserFoodCreateForm → UserFood
-    init(from form: UserFoodCreateForm, id: UUID) {
-        self.id = id
+    init(from form: UserFoodCreateForm) {
+        self.id = form.id
         self.name = form.name
         self.emoji = form.emoji
         self.detail = form.detail
@@ -60,5 +60,19 @@ public extension UserFood {
         self.info = form.info
         
         self.syncStatus = .notSynced
+    }
+}
+
+public extension UserFood {
+    var createForm: UserFoodCreateForm {
+        UserFoodCreateForm(
+            id: id,
+            name: name,
+            emoji: emoji,
+            detail: detail,
+            brand: brand,
+            status: status,
+            info: info
+        )
     }
 }

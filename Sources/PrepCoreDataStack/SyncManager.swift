@@ -20,6 +20,7 @@ enum UploadStep {
 }
 
 enum UploadError: Error {
+    case uploadUserFoods
 }
 
 let MonitorInterval = 5.0
@@ -44,7 +45,8 @@ public class SyncManager {
     }
     
     func scheduledTimer() {
-        DispatchQueue.global(qos: .default).async {
+        let concurrentQueue = DispatchQueue(label: "sync", qos: .background, attributes: .concurrent)
+        concurrentQueue.async {
             self.timer.invalidate()
             self.timer = Timer.scheduledTimer(timeInterval: MonitorInterval, target: self, selector: #selector(self.uploadNotSyncedData), userInfo: nil, repeats: true)
             RunLoop.current.add(self.timer, forMode: .common)
@@ -63,10 +65,39 @@ public class SyncManager {
     
     func uploadUserFoods(_ userFoods: [UserFood]) async throws -> Result<UploadStep, UploadError> {
         try dataManager.changeSyncStatus(ofUserFoods: userFoods, to: .syncPending)
-        try await sleepTask(Double.random(in: 1.0...10.0))
         
-        try dataManager.changeSyncStatus(ofUserFoods: userFoods, to: .synced)
-        return .success(.uploadUserFoods)
+        
+        /// **We're only uploading one to test this**
+        let url = URL(string: "https://pxlshpr.app/prep/user_foods")!
+
+        do {
+            let encoder = JSONEncoder()
+            var createForm = userFoods.first!.createForm
+            createForm.info.userId = UUID(uuidString: "B25579FD-26AA-4128-8F97-870DCAECCE9B")!
+            let data = try encoder.encode(createForm)
+
+            print("URl is \(url.absoluteString)")
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = data
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                fatalError("Couldn't get http response")
+            }
+            if httpResponse.statusCode == 200 {
+                try dataManager.changeSyncStatus(ofUserFoods: userFoods, to: .synced)
+                return .success(.uploadUserFoods)
+            } else {
+                try dataManager.changeSyncStatus(ofUserFoods: userFoods, to: .notSynced)
+                return .failure(.uploadUserFoods)
+            }
+        } catch {
+            try dataManager.changeSyncStatus(ofUserFoods: userFoods, to: .notSynced)
+            return .failure(.uploadUserFoods)
+        }
     }
     
     func uploadImage(with id: UUID) async throws -> Result<UploadStep, UploadError> {

@@ -3,7 +3,7 @@ import PrepDataTypes
 
 extension FoodFormManager {
     func saveUserFoodEntity(_ createForm: UserFoodCreateForm, uuid: UUID) async -> Result<FoodSaveStep, FoodSaveError> {
-        let userFood = UserFood(from: createForm, id: uuid)
+        let userFood = UserFood(from: createForm)
         do {
             try DataManager.shared.save(userFood: userFood)
             try DataManager.shared.refresh()
