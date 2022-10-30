@@ -1,5 +1,5 @@
 import Foundation
-
+import CloudKit
 
 struct UploadQueue {
     let userFoods: [UserFood]
@@ -21,9 +21,38 @@ enum UploadStep {
 
 enum UploadError: Error {
     case uploadUserFoods
+    case unableToGetCloudKitId(Error)
 }
 
 let MonitorInterval = 5.0
+
+///// async gets iCloud record name of logged-in user
+//func iCloudUserIDAsync(complete: (instance: CKRecordID?, error: NSError?) -> ()) {
+//    let container = CKContainer.defaultContainer()
+//    container.fetchUserRecordIDWithCompletionHandler() {
+//        recordID, error in
+//        if error != nil {
+//            print(error!.localizedDescription)
+//            complete(instance: nil, error: error)
+//        } else {
+//            print("fetched ID \(recordID?.recordName)")
+//            complete(instance: recordID, error: nil)
+//        }
+//    }
+//}
+//
+//
+//// call the function above in the following way:
+//// (userID is the string you are intersted in!)
+//
+//iCloudUserIDAsync() {
+//    recordID, error in
+//    if let userID = recordID?.recordName {
+//        print("received iCloudID \(userID)")
+//    } else {
+//        print("Fetched iCloudID was nil")
+//    }
+//}
 
 public class SyncManager {
     
@@ -67,13 +96,21 @@ public class SyncManager {
         try dataManager.changeSyncStatus(ofUserFoods: userFoods, to: .syncPending)
         
         
-        /// **We're only uploading one to test this**
-        let url = URL(string: "https://pxlshpr.app/prep/user_foods")!
+//        let url = URL(string: "https://pxlshpr.app/prep/user_foods")!
+        let url = URL(string: "http://localhost:8083/user_foods")!
 
         do {
             let encoder = JSONEncoder()
             var createForm = userFoods.first!.createForm
-            createForm.info.userId = UUID(uuidString: "B25579FD-26AA-4128-8F97-870DCAECCE9B")!
+            
+            let cloudKitId: String
+            do {
+                cloudKitId = try await getCloudKitId()
+            } catch {
+                return .failure(.unableToGetCloudKitId(error))
+            }
+            
+            createForm.info.cloudKitId = cloudKitId
             let data = try encoder.encode(createForm)
 
             print("URl is \(url.absoluteString)")
@@ -187,4 +224,22 @@ public func sleepTask(_ seconds: Double, tolerance: Double = 1) async throws {
         tolerance: .seconds(tolerance),
         clock: .suspending
     )
+}
+
+func getCloudKitId() async throws -> String {
+#if targetEnvironment(simulator)
+    /// Hardcoded until we can figure out how to get it on the simulator
+    return "_bb4da48895fb143fb727214fc39a8556"
+#else
+    try await withCheckedThrowingContinuation { continuation in
+        CKContainer.default().fetchUserRecordID(completionHandler: { (recordId, error) in
+            if let name = recordId?.recordName {
+                continuation.resume(returning: name)
+            }
+            else if let error = error {
+                continuation.resume(throwing: error)
+            }
+        })
+    }
+#endif
 }
