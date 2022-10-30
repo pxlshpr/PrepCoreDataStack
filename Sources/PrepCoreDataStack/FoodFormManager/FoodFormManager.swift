@@ -15,17 +15,7 @@ public class FoodFormManager {
     public static let shared = FoodFormManager()
     
     public func save(formOutput: FoodFormOutput) async throws {
-        /// Create a concurrent task group to:
-        /// - Persist each of the images to disk
-        /// - Persist the json data to disk
-        /// - Create and save the entity for UserFoodEntity
-        /// - Create and save the entities for UserFoodImageEntity
-        /// - Create and save the entity for UserFoodFormDataEntity
-        /// Once all of them are finished
-        ///     Then return with the result
-        ///     Get the DataManager singleton to refresh
-
-        return try await withTaskGroup(of: Result<FoodSaveStep, FoodSaveError>.self) { group in
+        return try await withThrowingTaskGroup(of: Result<FoodSaveStep, FoodSaveError>.self) { group in
             
             let foodId = UUID()
             
@@ -53,16 +43,18 @@ public class FoodFormManager {
 
             let start = CFAbsoluteTimeGetCurrent()
             
-            for await result in group {
+            for try await result in group {
                 switch result {
                 case .success(let step):
-                    print("✨ Step: \(step) completed in \(CFAbsoluteTimeGetCurrent()-start)s")
+                    print("💾 Save Step: \(step) completed in \(CFAbsoluteTimeGetCurrent()-start)s")
                 case .failure(let error):
-                    print("⚠️ Error: \(error)")
+                    throw error
                 }
             }
             
-            print("✅ All steps completed in \(CFAbsoluteTimeGetCurrent()-start)s")
+            print("✅ Save completed in \(CFAbsoluteTimeGetCurrent()-start)s … forcing an upload")
+            
+            SyncManager.shared.uploadNotSyncedData()
         }
     }
 }

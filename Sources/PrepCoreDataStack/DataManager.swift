@@ -53,4 +53,28 @@ public class DataManager: ObservableObject {
             self.imageFiles = imageFiles
         }
     }
+    
+    func userFoodsToSync() throws -> [UserFood] {
+        try coreDataManager.userFoodsToSync().map{ UserFood(from: $0) }
+    }
+    
+    func imageFilesToSync() throws -> [ImageFile] {
+        try coreDataManager.imageFilesToSync().map{ ImageFile(from: $0) }
+    }
+    
+    func userFoodsWithJsonToSync() throws -> [UserFood] {
+        try coreDataManager.userFoodsWithJsonToSync().map{ UserFood(from: $0) }
+    }
+    
+    func changeSyncStatus(ofUserFoods userFoods: [UserFood], to syncStatus: SyncStatus) throws {
+        try coreDataManager.changeSyncStatus(ofUserFoods: userFoods, to: syncStatus)
+    }
+    
+    func changeSyncStatus(ofImageWith id: UUID, to syncStatus: SyncStatus) throws {
+        try coreDataManager.changeSyncStatus(ofImageWith: id, to: syncStatus)
+    }
+
+    func changeSyncStatus(ofJsonWith id: UUID, to syncStatus: SyncStatus) throws {
+        try coreDataManager.changeSyncStatus(ofJsonWith: id, to: syncStatus)
+    }
 }
