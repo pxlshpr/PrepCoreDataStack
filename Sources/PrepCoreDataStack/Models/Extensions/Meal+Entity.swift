@@ -3,7 +3,8 @@ import PrepDataTypes
 
 //MARK: MealEntity → Meal
 public extension Meal {
-    init(from entity: MealEntity, day: Day) {
+    init(from entity: MealEntity) {
+        let day = Day(from: entity.day!)
         self.init(
             id: entity.id!,
             day: day,

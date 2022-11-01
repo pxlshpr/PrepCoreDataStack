@@ -13,4 +13,20 @@ extension MealEntity {
         self.updatedAt = meal.updatedAt
         self.deletedAt = meal.deletedAt ?? 0
     }
+    
+    convenience init(
+        context: NSManagedObjectContext,
+        name: String,
+        time: Date,
+        dayEntity: DayEntity
+    ) {
+        self.init(context: context)
+        self.id = UUID()
+        self.name = name
+        self.time = time.timeIntervalSince1970
+        self.markedAsEatenAt = 0
+        self.updatedAt = Date().timeIntervalSince1970
+        self.deletedAt = 0
+        self.day = dayEntity
+    }
 }

@@ -13,4 +13,17 @@ extension DayEntity {
         self.goalBonusEnergySplitRatio = day.goalBonusEnergySplitRatio?.rawValue ?? 0
         self.updatedAt = day.updatedAt
     }
+    
+    convenience init(context: NSManagedObjectContext, date: Date) {
+        self.init(context: context)
+        self.id = UUID()
+        self.date = date.startOfDay.timeIntervalSince1970
+        
+        //TODO: Get these passed in, or read from UserDefaults, etc...
+        self.addEnergyExpendituresToGoal = false
+        self.goalBonusEnergySplit = 0
+        self.goalBonusEnergySplitRatio = 0
+        
+        self.updatedAt = Date().timeIntervalSince1970
+    }
 }

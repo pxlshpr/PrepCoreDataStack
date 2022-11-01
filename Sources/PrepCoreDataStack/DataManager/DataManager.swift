@@ -25,7 +25,7 @@ public class DataManager: ObservableObject {
         /// Add an observer for any changes to the User (from another device)
         NotificationCenter.default.addObserver(
             self, selector: #selector(serverDidUpdateUser),
-            name: .coreDataDidUpdateUser, object: nil
+            name: .didUpdateUser, object: nil
         )
     }
     

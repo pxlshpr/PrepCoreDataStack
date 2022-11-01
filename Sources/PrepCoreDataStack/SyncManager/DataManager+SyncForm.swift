@@ -110,10 +110,6 @@ extension DataManager {
         try coreDataManager.replaceUser(with: entity, in: context)
         
         /// Now fire a notification to inform any interested parties (including ourself)
-        NotificationCenter.default.post(name: .coreDataDidUpdateUser, object: nil)
+        NotificationCenter.default.post(name: .didUpdateUser, object: nil)
     }
-}
-
-extension Notification.Name {
-    static var coreDataDidUpdateUser: Notification.Name { return .init("coreDataDidUpdateUser") }
 }
