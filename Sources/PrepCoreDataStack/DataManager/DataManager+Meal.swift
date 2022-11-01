@@ -24,4 +24,18 @@ public extension DataManager {
 
         /// Now handle the Syncer to send, and receive on both the device and the server
     }
+    
+    func getMealsForDate(_ date: Date) async throws -> [Meal] {
+        
+        try await withCheckedThrowingContinuation { continuation in
+            do {
+                try coreDataManager.mealEntities(for: date) { mealEntities in
+                    let meals = mealEntities.map { Meal(from: $0) }
+                    continuation.resume(returning: meals)
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
 }
