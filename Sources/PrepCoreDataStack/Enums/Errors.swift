@@ -31,4 +31,6 @@ enum CoreDataManagerError: Error {
     case fetchUserFoods(Error)
     case fetchImageFile(Error)
     case fetchUserFoodForJson(Error)
+    
+    case couldNotFindCurrentUser
 }

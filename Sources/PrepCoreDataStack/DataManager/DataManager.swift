@@ -19,7 +19,23 @@ public class DataManager: ObservableObject {
         do {
             try fetchUser()
         } catch {
-            print("CoreData error while fetching user")
+            print("CoreData error while fetching user: \(error)")
+        }
+        
+        /// Add an observer for any changes to the User (from another device)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(serverDidUpdateUser),
+            name: .coreDataDidUpdateUser, object: nil
+        )
+    }
+    
+    @objc func serverDidUpdateUser(notification: Notification) {
+        DispatchQueue.main.async {
+            do {
+                try self.fetchUser()
+            } catch {
+                print("CoreData error while updating user: \(error)")
+            }
         }
     }
 }

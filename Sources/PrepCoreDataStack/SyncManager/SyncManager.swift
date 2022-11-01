@@ -5,8 +5,11 @@ let SyncInterval = 5.0
 
 public class SyncManager {
     
+    let networkManager = NetworkManager.server
+    
     public static let shared = SyncManager()
-
+    let dataManager = DataManager.shared
+    
     var timer = Timer()
 
     public func startMonitoring() {
@@ -32,9 +35,11 @@ public class SyncManager {
     @objc func performSync() {
         Task {
             do {
-                let syncForm = try await DataManager.shared.getSyncForm()
-//                print(syncForm.description)
-                process(try await postSyncForm(syncForm))
+                let syncForm = try await dataManager.constructSyncForm()
+                
+                print("📱→ Sending \(syncForm.description)")
+                
+                try await dataManager.process(try await postSyncForm(syncForm))
             } catch NetworkManagerError.httpError(let statusCode) {
                 let status = statusCode != nil ? "\(statusCode!)" : "[no status code]"
                 print("◽️⚠️ SyncError: HTTP status code \(status)")
@@ -47,7 +52,7 @@ public class SyncManager {
     }
     
     func postSyncForm(_ syncForm: SyncForm) async throws -> SyncForm {
-        let responseData = try await NetworkManager.local.post(syncForm, to: .sync)
+        let responseData = try await networkManager.post(syncForm, to: .sync)
         
         guard
             let responseData,
@@ -56,34 +61,9 @@ public class SyncManager {
         }
         return syncForm
     }
-    
-    func process(_ syncForm: SyncForm) {
-        func processUpdates() {
-            //TODO: For each entity in updates
-            // If it doesn't exist on device,
-            //     insert it
-            // If it exists, and server.updatedAt > device.updatedAt
-            //     update existing object with received, by entity type (updatedAt flag should be set to server's)
-        }
-        
-        func processDeletions() {
-            //TODO: For each entity in deletions
-            // If device.updatedAt < server.deletedAt
-            //     delete the entity, make sure we do it in the correct order depending on entity type
-            // Else
-            //     do not delete as we've had edits to the object since the deletion occured
-        }
-        
-        func setNewVersionTimestamp() {
-            versionTimestamp = syncForm.versionTimestamp
-        }
-        
-        processUpdates()
-        processDeletions()
-        setNewVersionTimestamp()
-    }
 }
 
 enum SyncError: Error {
     case failedToReceiveSyncForm
+    case syncPerformedWithoutFetchedUser
 }
