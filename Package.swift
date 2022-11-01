@@ -15,7 +15,7 @@ let package = Package(
             targets: ["PrepCoreDataStack"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.31"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.49"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
