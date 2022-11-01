@@ -26,7 +26,6 @@ public extension DataManager {
     }
     
     func getMealsForDate(_ date: Date) async throws -> [Meal] {
-        
         try await withCheckedThrowingContinuation { continuation in
             do {
                 try coreDataManager.mealEntities(for: date) { mealEntities in

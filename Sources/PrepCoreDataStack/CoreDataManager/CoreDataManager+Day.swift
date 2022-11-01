@@ -8,7 +8,7 @@ extension CoreDataManager {
 
     func fetchDayEntity(for date: Date, context: NSManagedObjectContext) throws -> DayEntity? {
         let request: NSFetchRequest<DayEntity> = DayEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "date == %f", date.startOfDay.timestamp)
+        request.predicate = NSPredicate(format: "date == %d", date.startOfDay.timestamp)
         return try context.fetch(request).first
     }
 
