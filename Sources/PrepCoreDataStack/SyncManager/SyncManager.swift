@@ -39,7 +39,7 @@ public class SyncManager {
                 
                 print("📱→ Sending \(syncForm.description)")
                 
-                try await dataManager.process(try await postSyncForm(syncForm))
+                try await dataManager.process(try await postSyncForm(syncForm), sentFor: syncForm)
             } catch NetworkManagerError.httpError(let statusCode) {
                 let status = statusCode != nil ? "\(statusCode!)" : "[no status code]"
                 print("◽️⚠️ SyncError: HTTP status code \(status)")

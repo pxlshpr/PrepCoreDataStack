@@ -13,7 +13,7 @@ public extension Day {
             goalBonusEnergySplitRatio: GoalBonusEnergySplitRatio(rawValue: entity.goalBonusEnergySplitRatio),
             energyExpenditures: [],
             meals: [],
-            syncStatus: .notSynced,
+            syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt
         )
     }

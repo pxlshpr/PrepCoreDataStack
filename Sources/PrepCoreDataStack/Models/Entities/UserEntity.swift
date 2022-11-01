@@ -13,5 +13,6 @@ extension UserEntity {
         self.explicitVolumeUnits = try! JSONEncoder().encode(user.explicitVolumeUnits)
         self.bodyMeasurements = try! JSONEncoder().encode(user.bodyMeasurements)
         self.updatedAt = user.updatedAt
+        self.syncStatus = user.syncStatus.rawValue
     }
 }

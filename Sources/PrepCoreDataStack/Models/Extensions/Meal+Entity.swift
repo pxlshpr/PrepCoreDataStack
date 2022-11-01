@@ -12,7 +12,7 @@ public extension Meal {
             time: entity.time,
             markedAsEatenAt: entity.markedAsEatenAt,
             foodItems: [],
-            syncStatus: .notSynced,
+            syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt,
             deletedAt: entity.deletedAt
         )

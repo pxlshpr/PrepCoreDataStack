@@ -12,6 +12,7 @@ extension MealEntity {
         self.markedAsEatenAt = meal.markedAsEatenAt ?? 0
         self.updatedAt = meal.updatedAt
         self.deletedAt = meal.deletedAt ?? 0
+        self.syncStatus = meal.syncStatus.rawValue
     }
     
     convenience init(
@@ -28,5 +29,6 @@ extension MealEntity {
         self.updatedAt = Date().timeIntervalSince1970
         self.deletedAt = 0
         self.day = dayEntity
+        self.syncStatus = SyncStatus.notSynced.rawValue
     }
 }

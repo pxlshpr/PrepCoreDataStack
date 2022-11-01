@@ -12,6 +12,7 @@ extension DayEntity {
         self.goalBonusEnergySplit = day.goalBonusEnergySplit?.rawValue ?? 0
         self.goalBonusEnergySplitRatio = day.goalBonusEnergySplitRatio?.rawValue ?? 0
         self.updatedAt = day.updatedAt
+        self.syncStatus = day.syncStatus.rawValue
     }
     
     convenience init(context: NSManagedObjectContext, date: Date) {
@@ -25,5 +26,6 @@ extension DayEntity {
         self.goalBonusEnergySplitRatio = 0
         
         self.updatedAt = Date().timeIntervalSince1970
+        self.syncStatus = SyncStatus.notSynced.rawValue
     }
 }

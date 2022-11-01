@@ -11,6 +11,7 @@ public extension User {
             prefersMetricUnits: entity.prefersMetricUnits,
             explicitVolumeUnits: try! JSONDecoder().decode(UserExplicitVolumeUnits.self, from: entity.explicitVolumeUnits!),
             bodyMeasurements: try! JSONDecoder().decode(BodyMeasurements.self, from: entity.bodyMeasurements!),
+            syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt
         )
     }

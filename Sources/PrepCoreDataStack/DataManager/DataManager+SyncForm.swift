@@ -27,13 +27,26 @@ extension DataManager {
     func constructSyncUpdates() async throws -> SyncForm.Updates {
         try await withCheckedThrowingContinuation { continuation in
             coreDataManager.updatedEntities { updatedEntities in
+                
                 var user: User? = nil
                 if let userEntity = updatedEntities.userEntity {
                     user = User(from: userEntity)
                 }
                 
+                var days: [Day]? = nil
+                if let dayEntities = updatedEntities.dayEntities {
+                    days = dayEntities.map { Day(from: $0) }
+                }
+
+                var meals: [Meal]? = nil
+                if let mealEntities = updatedEntities.mealEntities {
+                    meals = mealEntities.map { Meal(from: $0) }
+                }
+
                 let updated = SyncForm.Updates(
-                    user: user
+                    user: user,
+                    days: days,
+                    meals: meals
                 )
 
                 continuation.resume(returning: updated)
@@ -55,19 +68,60 @@ extension DataManager {
 import CoreData
 
 extension DataManager {
-    func process(_ syncForm: SyncForm) async throws {
-        guard let userId = user?.id else {
+    
+    /// Go through any updates that we had sent and mark their `syncStatus` and `synced`
+    func markUpdatesAsSynced(_ updates: SyncForm.Updates) async {
+        let bgContext = coreDataManager.newBackgroundContext()
+        await bgContext.perform {
+            do {
+                if let _ = updates.user {
+                    try self.coreDataManager.markUserAsSynced(context: bgContext)
+                }
+                if let days = updates.days {
+                    try self.coreDataManager.markDaysAsSynced(dayIds: days.map({$0.id}),
+                                                              context: bgContext)
+                }
+                if let meals = updates.meals {
+                    try self.coreDataManager.markMealsAsSynced(mealIds: meals.map({$0.id}),
+                                                               context: bgContext)
+                }
+            } catch {
+                print("Error marking updates as synced: \(error)")
+            }
+        }
+    }
+    
+    /// Go through any deletions we had sent and actually delete them now
+    func proceedWithDeletions(_ deletions: SyncForm.Deletions) async {
+        
+    }
+    func completeSync(for syncForm: SyncForm) async {
+        if let updates = syncForm.updates {
+            await markUpdatesAsSynced(updates)
+        }
+        
+        if let deletions = syncForm.deletions {
+            await proceedWithDeletions(deletions)
+        }
+    }
+    
+    func process(_ serverSyncForm: SyncForm, sentFor deviceSyncForm: SyncForm) async throws {
+        guard let _ = user?.id else {
             throw SyncError.syncPerformedWithoutFetchedUser
         }
         
-        print("💧→ Received \(syncForm.description)")
+        print("💧→ Received \(serverSyncForm.description)")
 
-        if let updates = syncForm.updates {
+        if let updates = serverSyncForm.updates {
             try await processUpdates(updates)
         }
         
         processDeletions()
-        versionTimestamp = syncForm.versionTimestamp
+        
+        /// Now complete the sync for the device sync form
+        await completeSync(for: deviceSyncForm)
+        
+        versionTimestamp = serverSyncForm.versionTimestamp
     }
     
     
