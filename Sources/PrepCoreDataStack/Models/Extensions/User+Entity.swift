@@ -11,7 +11,7 @@ public extension User {
             prefersMetricUnits: entity.prefersMetricUnits,
             explicitVolumeUnits: try! JSONDecoder().decode(UserExplicitVolumeUnits.self, from: entity.explicitVolumeUnits!),
             bodyMeasurements: try! JSONDecoder().decode(BodyMeasurements.self, from: entity.bodyMeasurements!),
-            updatedAt: Date(timeIntervalSince1970: Double(entity.updatedAt))
+            updatedAt: entity.updatedAt
         )
     }
 }

@@ -32,6 +32,8 @@ public class SyncManager {
     @objc func performSync() {
         Task {
             do {
+                let syncForm = try await DataManager.shared.getSyncForm()
+//                print(syncForm.description)
                 process(try await postSyncForm(syncForm))
             } catch NetworkManagerError.httpError(let statusCode) {
                 let status = statusCode != nil ? "\(statusCode!)" : "[no status code]"
@@ -44,19 +46,6 @@ public class SyncManager {
         }
     }
     
-    var syncForm: SyncForm {
-        SyncForm(
-            updates: updates,
-            deletions: deletions,
-            versionTimestamp: versionTimestamp
-        )
-    }
-    
-    var deletions: SyncForm.Deletions {
-        //TODO: Include all entities (except `UserEntity`) with a deletedAt greater than versionTimestamp
-        SyncForm.Deletions()
-    }
-
     func postSyncForm(_ syncForm: SyncForm) async throws -> SyncForm {
         let responseData = try await NetworkManager.local.post(syncForm, to: .sync)
         

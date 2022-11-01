@@ -20,16 +20,5 @@ extension DataManager {
         
         try coreDataManager.save(entity)
         self.user = user
-    }
-    
-    /// Returns the `User` if updated since the last `versionTimestamp` (which includes a newly created one)
-    var updatedUser: User? {
-        guard
-            let user = user,
-            user.updatedAt > versionDate
-        else {
-            return nil
-        }
-        return user
-    }
+    }    
 }

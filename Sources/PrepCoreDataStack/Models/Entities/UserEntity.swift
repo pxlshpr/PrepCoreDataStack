@@ -12,6 +12,6 @@ extension UserEntity {
         self.prefersMetricUnits = user.prefersMetricUnits
         self.explicitVolumeUnits = try! JSONEncoder().encode(user.explicitVolumeUnits)
         self.bodyMeasurements = try! JSONEncoder().encode(user.bodyMeasurements)
-        self.updatedAt = Int32(user.updatedAt.timeIntervalSince1970)
+        self.updatedAt = user.updatedAt
     }
 }
