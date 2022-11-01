@@ -1,6 +1,6 @@
-import Foundation
-import CloudKit
-
+//import Foundation
+//import CloudKit
+//
 //struct UploadQueue {
 //    let userFoods: [UserFood]
 //    let jsonIds: [UUID]
@@ -25,7 +25,7 @@ import CloudKit
 //}
 //
 //let MonitorInterval = 5.0
-
+//
 ///// async gets iCloud record name of logged-in user
 //func iCloudUserIDAsync(complete: (instance: CKRecordID?, error: NSError?) -> ()) {
 //    let container = CKContainer.defaultContainer()
@@ -53,26 +53,26 @@ import CloudKit
 //        print("Fetched iCloudID was nil")
 //    }
 //}
-
-public class SyncManager {
-    
-    public static let shared = SyncManager()
-    
+//
+//public class SyncManager {
+//
+//    public static let shared = SyncManager()
+//
 //    let dataManager = DataManager.shared
-//    
+//
 //    var timer = Timer()
 //    var isSyncing = false
-//    
+//
 //    //MARK: - Monitoring
-//    
+//
 //    public func startMonitoring() {
 //        scheduledTimer()
 //    }
-//    
+//
 //    public func stopMonitoring() {
 //        timer.invalidate()
 //    }
-//    
+//
 //    func scheduledTimer() {
 //        let concurrentQueue = DispatchQueue(label: "sync", qos: .background, attributes: .concurrent)
 //        concurrentQueue.async {
@@ -84,31 +84,31 @@ public class SyncManager {
 //    }
 //
 //    //MARK: - Convenience
-//    
+//
 //    func getUploadQueue() async throws -> UploadQueue {
 //        let userFoods = try await dataManager.userFoodsToSync()
 //        let jsonIds = try await dataManager.userFoodsWithJsonToSync().map { $0.id }
 //        let imageIds = try await dataManager.imageFilesToSync().map { $0.id }
 //        return UploadQueue(userFoods: userFoods, jsonIds: jsonIds, imageIds: imageIds)
 //    }
-//    
+//
 //    func uploadUserFoods(_ userFoods: [UserFood]) async throws -> Result<UploadStep, UploadError> {
 //        try dataManager.changeSyncStatus(ofUserFoods: userFoods, to: .syncPending)
-//            
+//
 //        let url = URL(string: "https://pxlshpr.app/prep/user_foods")!
 ////        let url = URL(string: "http://localhost:8083/user_foods")!
 //
 //        do {
 //            let encoder = JSONEncoder()
 //            var createForm = userFoods.first!.createForm
-//            
+//
 //            let cloudKitId: String
 //            do {
 //                cloudKitId = try await getCloudKitId()
 //            } catch {
 //                return .failure(.unableToGetCloudKitId(error))
 //            }
-//            
+//
 //            createForm.info.cloudKitId = cloudKitId
 //            let data = try encoder.encode(createForm)
 //
@@ -135,30 +135,30 @@ public class SyncManager {
 //            return .failure(.uploadUserFoods)
 //        }
 //    }
-//    
+//
 //    func uploadImage(with id: UUID) async throws -> Result<UploadStep, UploadError> {
 //        try dataManager.changeSyncStatus(ofImageWith: id, to: .syncPending)
 //        try await sleepTask(Double.random(in: 1.0...10.0))
-//        
+//
 //        try dataManager.changeSyncStatus(ofImageWith: id, to: .synced)
 //        return .success(.uploadImage(id))
 //    }
-//    
+//
 //    func uploadJson(with id: UUID) async throws -> Result<UploadStep, UploadError> {
 //        try dataManager.changeSyncStatus(ofJsonWith: id, to: .syncPending)
 //        try await sleepTask(Double.random(in: 1.0...10.0))
-//        
+//
 //        try dataManager.changeSyncStatus(ofJsonWith: id, to: .synced)
 //        return .success(.uploadJson(id))
 //    }
-//    
+//
 //    @objc func uploadNotSyncedData() {
 //        print("🔄 Checking for uploads …")
 //        guard !isSyncing else {
 //            print("🔄 … sync in progress")
 //            return
 //        }
-//        
+//
 //        Task {
 //            do {
 //                let queue = try await getUploadQueue()
@@ -181,10 +181,10 @@ public class SyncManager {
 //            }
 //        }
 //    }
-//    
+//
 //    func upload(_ queue: UploadQueue) async throws {
 //        return try await withThrowingTaskGroup(of: Result<UploadStep, UploadError>.self) { group in
-//            
+//
 //            group.addTask {
 //                return try await self.uploadUserFoods(queue.userFoods)
 //            }
@@ -202,7 +202,7 @@ public class SyncManager {
 //            }
 //
 //            let start = CFAbsoluteTimeGetCurrent()
-//            
+//
 //            for try await result in group {
 //                switch result {
 //                case .success(let step):
@@ -211,17 +211,8 @@ public class SyncManager {
 //                    throw error
 //                }
 //            }
-//            
+//
 //            print("✅ Upload completed in \(CFAbsoluteTimeGetCurrent()-start)s")
 //        }
 //    }
-}
-
-public func sleepTask(_ seconds: Double, tolerance: Double = 1) async throws {
-    try await Task.sleep(
-        until: .now + .seconds(seconds),
-        tolerance: .seconds(tolerance),
-        clock: .suspending
-    )
-}
-
+//}

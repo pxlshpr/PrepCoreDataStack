@@ -1,26 +1,7 @@
+import Foundation
 import CoreData
 
-class CoreDataManager: NSPersistentContainer {
- 
-    init() {
-        guard
-            let objectModelURL = Bundle.module.url(forResource: "Prep", withExtension: "momd"),
-            let objectModel = NSManagedObjectModel(contentsOf: objectModelURL)
-        else {
-            fatalError("Failed to retrieve the object model")
-        }
-        super.init(name: "Prep", managedObjectModel: objectModel)
-        self.initialize()
-    }
-    
-    private func initialize() {
-        self.loadPersistentStores { description, error in
-            if let err = error {
-                fatalError("Failed to load CoreData: \(err)")
-            }
-            print("Core data loaded: \(description)")
-        }
-    }
+extension CoreDataManager {
     
     func recentUserFoods() throws -> [UserFoodEntity] {
         var recents: [UserFoodEntity] = []
@@ -173,20 +154,4 @@ class CoreDataManager: NSPersistentContainer {
 //            throw CoreDataManagerError.fetchUserFoodForJson(error)
 //        }
 //    }
-}
-
-enum CoreDataManagerError: Error {
-    case mismatchingUserFoodEntities
-    case duplicateImageFileEntities
-    case missingImageFileEntity
-    case multipleUserFoodsForTheSameId
-    case missingUserFoodEntity
-    
-    case saveInChangeSyncStatusOfUserFoods(Error)
-    case saveInChangeSyncStatusOfImage(Error)
-    case saveInChangeSyncStatusOfJson(Error)
-
-    case fetchUserFoods(Error)
-    case fetchImageFile(Error)
-    case fetchUserFoodForJson(Error)
 }

@@ -3,6 +3,21 @@
     <entity name="ImageFileEntity" representedClassName="ImageFileEntity" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="UserEntity" representedClassName="UserEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="bodyMeasurements" attributeType="Binary"/>
+        <attribute name="cloudKitId" optional="YES" attributeType="String"/>
+        <attribute name="explicitVolumeUnits" attributeType="Binary"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="preferredEnergyUnit" attributeType="Integer 16" usesScalarValueType="YES"/>
+        <attribute name="prefersMetricUnits" attributeType="Boolean" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="UserFoodEntity" representedClassName="PrepCoreDataStack.UserFoodEntity" syncable="YES" codeGenerationType="class">
         <attribute name="barcodes" optional="YES" attributeType="String"/>
