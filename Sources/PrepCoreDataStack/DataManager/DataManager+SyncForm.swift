@@ -10,12 +10,13 @@ extension DataManager {
         
         let updates = try await constructSyncUpdates()
         let deletions = syncDeletions
-        return SyncForm(
+        let form = SyncForm(
             updates: updates,
             deletions: deletions,
             userId: userId,
             versionTimestamp: versionTimestamp
         )
+        return form
     }
 
     var syncDeletions: SyncForm.Deletions {
@@ -85,6 +86,8 @@ extension DataManager {
                     try self.coreDataManager.markMealsAsSynced(mealIds: meals.map({$0.id}),
                                                                context: bgContext)
                 }
+                
+                try bgContext.save()
             } catch {
                 print("Error marking updates as synced: \(error)")
             }
@@ -139,9 +142,18 @@ extension DataManager {
         await bgContext.perform {
 
             do {
+                guard let _ = self.user else { throw SyncError.syncPerformedWithoutFetchedUser }
+
                 if let user = updates.user {
-                    try self.updateUser(with: user, context: bgContext)
+                    try self.updateUser(with: user, in: bgContext)
                 }
+                if let days = updates.days {
+                    try self.createOrUpdateDays(days, in: bgContext)
+                }
+                if let meals = updates.meals {
+                    try self.createOrUpdateMeals(meals, in: bgContext)
+                }
+                
             } catch {
                 print("Error: \(error)")
             }
@@ -154,16 +166,85 @@ extension DataManager {
         //     update existing object with received, by entity type (updatedAt flag should be set to server's)
     }
     
-    func updateUser(with serverUser: User, context: NSManagedObjectContext) throws {
-        guard let user else { throw SyncError.syncPerformedWithoutFetchedUser }
-        
-        /// Convert `User` → `UserEntity`
-        let entity = UserEntity(context: context, user: serverUser)
-        
-        /// Ask `CoreDataManager` to replace our existing user with it
-        try coreDataManager.replaceUser(with: entity, in: context)
+    func updateUser(with serverUser: User, in context: NSManagedObjectContext) throws {
+        guard let deviceUser = try coreDataManager.userEntity(context: context) else {
+            throw CoreDataManagerError.couldNotFindCurrentUser
+        }
+        try deviceUser.update(with: serverUser, in: context)
+        try context.save()
         
         /// Now fire a notification to inform any interested parties (including ourself)
         NotificationCenter.default.post(name: .didUpdateUser, object: nil)
     }
+    
+    func createOrUpdateDays(_ days: [Day], in context: NSManagedObjectContext) throws {
+        try days.forEach { day in
+            try createOrUpdateDay(day, in: context)
+        }
+    }
+    
+    func createOrUpdateDay(_ serverDay: Day, in context: NSManagedObjectContext) throws {
+        if let day = try coreDataManager.dayEntity(with: serverDay.id, context: context) {
+            print("📝 Updating existing Day")
+            try day.update(with: serverDay, in: context)
+        } else {
+            let dayEntity = DayEntity(context: context, day: serverDay)
+            print("✨ Inserting Day")
+            context.insert(dayEntity)
+        }
+        
+        try context.save()
+
+        /// If the day exists—we've probably changed the goal, or goal params
+        ///     so simply update it by replacing it
+        ///     send a notification saying that the `Day` was changed
+        /// Otherwise
+        ///     add it
+        ///     we don't need to post notifications about this right now (Diary View will simply get meals being added)
+    }
+    
+    func createOrUpdateMeals(_ meals: [Meal], in context: NSManagedObjectContext) throws {
+        try meals.forEach { meal in
+            try createOrUpdateMeal(meal, in: context)
+        }
+
+        /// Send a notification on the main thread
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: .didUpdateMeals,
+                object: nil,
+                userInfo: [Notification.Keys.meals: meals]
+            )
+        }
+        /// If the meal exists—we've probably changed the completion state, or name, time, etc.
+        ///     so simply update it by replacing it
+        ///     send a notification saying that the `Meal` was changed
+        /// Otherwise
+        ///     add it
+        ///     send the notification saying that the `Meal` was added
+    }
+    
+    func createOrUpdateMeal(_ serverMeal: Meal, in context: NSManagedObjectContext) throws {
+        if let meal = try coreDataManager.mealEntity(with: serverMeal.id, context: context) {
+            print("📝 Updating existing Meal")
+            try meal.update(with: serverMeal, in: context)
+        } else {
+            guard let dayEntity = try coreDataManager.fetchDayEntity(calendarDayString: serverMeal.day.calendarDayString, context: context) else {
+                throw DataManagerError.noDayFound
+            }
+            let mealEntity = MealEntity(context: context, meal: serverMeal, dayEntity: dayEntity)
+            print("✨ Inserting Meal")
+            context.insert(mealEntity)
+        }
+        
+        try context.save()
+
+        /// If the day exists—we've probably changed the goal, or goal params
+        ///     so simply update it by replacing it
+        ///     send a notification saying that the `Day` was changed
+        /// Otherwise
+        ///     add it
+        ///     we don't need to post notifications about this right now (Diary View will simply get meals being added)
+    }
+
 }

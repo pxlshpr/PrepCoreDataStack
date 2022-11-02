@@ -35,11 +35,10 @@ public class SyncManager {
     @objc func performSync() {
         Task {
             do {
-                let syncForm = try await dataManager.constructSyncForm()
-                
-                print("📱→ Sending \(syncForm.description)")
-                
-                try await dataManager.process(try await postSyncForm(syncForm), sentFor: syncForm)
+                let deviceSyncForm = try await dataManager.constructSyncForm()
+                print("📱→ Sending \(deviceSyncForm.description)")
+                let serverSyncForm = try await postSyncForm(deviceSyncForm)
+                try await dataManager.process(serverSyncForm, sentFor: deviceSyncForm)
             } catch NetworkManagerError.httpError(let statusCode) {
                 let status = statusCode != nil ? "\(statusCode!)" : "[no status code]"
                 print("◽️⚠️ SyncError: HTTP status code \(status)")

@@ -7,7 +7,7 @@ extension DayEntity {
     convenience init(context: NSManagedObjectContext, day: Day) {
         self.init(context: context)
         self.id = day.id
-        self.date = day.date
+        self.calendarDayString = day.calendarDayString
         self.addEnergyExpendituresToGoal = day.addEnergyExpendituresToGoal
         self.goalBonusEnergySplit = day.goalBonusEnergySplit?.rawValue ?? 0
         self.goalBonusEnergySplitRatio = day.goalBonusEnergySplitRatio?.rawValue ?? 0
@@ -15,10 +15,10 @@ extension DayEntity {
         self.syncStatus = day.syncStatus.rawValue
     }
     
-    convenience init(context: NSManagedObjectContext, date: Date) {
+    convenience init(context: NSManagedObjectContext, date: Date, userId: UUID) {
         self.init(context: context)
-        self.id = UUID()
-        self.date = date.startOfDay.timeIntervalSince1970
+        self.id = "\(userId.uuidString.lowercased())_\(Int(date.startOfDay.timeIntervalSince1970))"
+        self.calendarDayString = date.calendarDayString
         
         //TODO: Get these passed in, or read from UserDefaults, etc...
         self.addEnergyExpendituresToGoal = false
@@ -27,5 +27,16 @@ extension DayEntity {
         
         self.updatedAt = Date().timeIntervalSince1970
         self.syncStatus = SyncStatus.notSynced.rawValue
+    }
+}
+
+extension DayEntity {
+    func update(with serverDay: Day, in context: NSManagedObjectContext) throws {
+        id = serverDay.id
+        addEnergyExpendituresToGoal = serverDay.addEnergyExpendituresToGoal
+        goalBonusEnergySplit = serverDay.goalBonusEnergySplit?.rawValue ?? 0
+        goalBonusEnergySplitRatio = serverDay.goalBonusEnergySplitRatio?.rawValue ?? 0
+        updatedAt = serverDay.updatedAt
+        syncStatus = SyncStatus.synced.rawValue
     }
 }

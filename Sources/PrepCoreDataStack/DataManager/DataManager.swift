@@ -12,6 +12,7 @@ public class DataManager: ObservableObject {
 
     convenience init() {
         self.init(coreDataManager: CoreDataManager())
+        coreDataManager.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
     
     init(coreDataManager: CoreDataManager) {

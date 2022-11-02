@@ -2,9 +2,9 @@ import CoreData
 import PrepDataTypes
 
 extension CoreDataManager {
-    func userEntity() throws -> UserEntity? {
+    func userEntity(context: NSManagedObjectContext) throws -> UserEntity? {
         let fetchRequest = NSFetchRequest<UserEntity>(entityName: "UserEntity")
-        return try viewContext.fetch(fetchRequest).first
+        return try context.fetch(fetchRequest).first
     }
     
     func save(_ userEntity: UserEntity) throws {
@@ -18,7 +18,7 @@ extension CoreDataManager {
         userEntity?.syncStatus = SyncStatus.synced.rawValue
     }
     
-    func markDaysAsSynced(dayIds: [UUID], context: NSManagedObjectContext) throws {
+    func markDaysAsSynced(dayIds: [String], context: NSManagedObjectContext) throws {
         let fetchRequest = NSFetchRequest<DayEntity>(entityName: "DayEntity")
         fetchRequest.predicate = NSPredicate(format: "id IN %@", dayIds)
         let dayEntities = try context.fetch(fetchRequest)
@@ -35,21 +35,21 @@ extension CoreDataManager {
             mealEntity.syncStatus = SyncStatus.synced.rawValue
         }
     }
+}
 
-    func replaceUser(with newUserEntity: UserEntity, in context: NSManagedObjectContext) throws {
-        let request = NSFetchRequest<UserEntity>(entityName: "UserEntity")
-        guard let existingUser =  try context.fetch(request).first else {
-            throw CoreDataManagerError.couldNotFindCurrentUser
-        }
-        
-        if let existingId = existingUser.id, let newId = newUserEntity.id {
-            if existingId != newId {
-                print("Replacing userId with actual: \(newId)")
-            }
-        }
+extension CoreDataManager {
+    func dayEntity(with id: String, context: NSManagedObjectContext) throws -> DayEntity? {
+        let request = NSFetchRequest<DayEntity>(entityName: "DayEntity")
+        request.predicate = NSPredicate(format: "id == %@", id)
+        return try context.fetch(request).first
+    }
+}
 
-        context.delete(existingUser)
-        try context.save()
+extension CoreDataManager {
+    func mealEntity(with id: UUID, context: NSManagedObjectContext) throws -> MealEntity? {
+        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+        request.predicate = NSPredicate(format: "id == %@", id.uuidString)
+        return try context.fetch(request).first
     }
 }
 

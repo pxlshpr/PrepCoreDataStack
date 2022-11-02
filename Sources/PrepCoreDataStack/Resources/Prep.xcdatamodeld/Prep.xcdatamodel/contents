@@ -2,10 +2,10 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21279" systemVersion="21G83" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="DayEntity" representedClassName="DayEntity" syncable="YES" codeGenerationType="class">
         <attribute name="addEnergyExpendituresToGoal" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="date" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="calendarDayString" attributeType="String"/>
         <attribute name="goalBonusEnergySplit" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="goalBonusEnergySplitRatio" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="meals" toMany="YES" deletionRule="Nullify" destinationEntity="MealEntity" inverseName="day" inverseEntity="MealEntity"/>

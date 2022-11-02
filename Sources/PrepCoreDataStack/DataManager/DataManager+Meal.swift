@@ -2,13 +2,22 @@ import Foundation
 import PrepDataTypes
 import Timeline
 
+enum DataManagerError: Error {
+    case noUserFound
+    case noDayFound
+}
+
 public extension DataManager {
 
     func addNewMeal(named name: String, at time: Date, on date: Date) throws {
+        guard let user else {
+            throw DataManagerError.noUserFound
+        }
+        
         //TODO: We need to know what the current day is, assuming it to be today for now
         /// Construct the new `Meal`
         /// Pass this to CoreData manager as a `MealEntity`, which would create the `DayEntity` if needed
-        let mealEntity = try coreDataManager.saveMealEntity(named: name, at: time, on: date)
+        let mealEntity = try coreDataManager.saveMealEntity(named: name, at: time, on: date, for: user.id)
 
         /// Now send a notification named`didAddMeal` with the new `Meal` as a user info
         /// The `ListPage` and `TimelinePage` should subscribe to notifications of this

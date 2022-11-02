@@ -3,7 +3,7 @@ import PrepDataTypes
 
 extension DataManager {
     func fetchUser() throws {
-        guard let user = try coreDataManager.userEntity() else {
+        guard let user = try coreDataManager.userEntity(context: coreDataManager.viewContext) else {
             return
         }
         self.user = User(from: user)
