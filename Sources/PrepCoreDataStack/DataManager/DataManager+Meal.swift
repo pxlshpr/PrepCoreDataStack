@@ -1,6 +1,5 @@
 import Foundation
 import PrepDataTypes
-import Timeline
 
 enum DataManagerError: Error {
     case noUserFound
@@ -46,32 +45,5 @@ public extension DataManager {
                 continuation.resume(throwing: error)
             }
         }
-    }
-    
-    //TODO: Make
-    func timelineItems(for date: Date) async throws -> [TimelineItem] {
-        let meals = try await getMealsForDate(date)
-        var timelineItems = meals.map { meal in
-            TimelineItem(
-                id: meal.id.uuidString,
-                name: meal.name,
-                date: Date(timeIntervalSince1970: meal.time),
-                emojis: [],
-                type: .meal
-            )
-        }
-//        /// Get and create TimelineItems from workouts
-//        let workouts = Self.workouts(onDate: date)
-//        timelineItems.append(contentsOf: workouts.map({ workout in
-//            TimelineItem(id: (workout.id ?? UUID()).uuidString,
-//                         name: workout.name ?? "Workout",
-//                         date: workout.startDate,
-//                         duration: TimeInterval(workout.duration),
-//                         emojiStrings: [workout.emoji],
-//                         type: .workout)
-//        }))
-
-        return timelineItems
-    }
+    }    
 }
-
