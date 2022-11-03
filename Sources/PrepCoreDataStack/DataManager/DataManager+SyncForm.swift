@@ -230,7 +230,7 @@ extension DataManager {
             try meal.update(with: serverMeal, in: context)
         } else {
             guard let dayEntity = try coreDataManager.fetchDayEntity(calendarDayString: serverMeal.day.calendarDayString, context: context) else {
-                throw DataManagerError.noDayFound
+                throw DataManagerError.noDayFoundWhenInsertingMealFromServer
             }
             let mealEntity = MealEntity(context: context, meal: serverMeal, dayEntity: dayEntity)
             print("✨ Inserting Meal")

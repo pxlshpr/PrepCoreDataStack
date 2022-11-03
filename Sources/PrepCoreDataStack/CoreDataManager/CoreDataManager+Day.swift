@@ -16,6 +16,12 @@ extension CoreDataManager {
         try fetchDayEntity(calendarDayString: date.calendarDayString, context: context)
     }
 
+    func fetchDayEntities(for range: Range<Date>, context: NSManagedObjectContext) throws -> [DayEntity] {
+        let request: NSFetchRequest<DayEntity> = DayEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "calendarDayString IN %@", range.calendarDayStrings)
+        return try context.fetch(request)
+    }
+
     func createDayEntity(on date: Date, for userId: UUID) throws -> DayEntity {
         let dayEntity = DayEntity(context: viewContext, date: date, userId: userId)
         self.viewContext.insert(dayEntity)
@@ -23,6 +29,19 @@ extension CoreDataManager {
     }
 }
 
+extension Range where Bound == Date {
+    var dates: [Date] {
+        Array(stride(
+            from: lowerBound.startOfDay,
+            to: upperBound.startOfDay,
+            by: 60*60*24
+        ))
+    }
+    
+    var calendarDayStrings: [String] {
+        dates.map { $0.calendarDayString }
+    }
+}
 /// Meal
 extension CoreDataManager {
 //    func saveNewMeal(named name: String, at time: Date, on date: Date) throws -> (MealEntity, DayEntity) {
@@ -44,7 +63,6 @@ extension CoreDataManager {
     }
     
     func mealEntities(for date: Date, completion: @escaping (([MealEntity]) -> ())) throws {
-        
         Task {
             let bgContext =  newBackgroundContext()
             await bgContext.perform {
@@ -56,6 +74,43 @@ extension CoreDataManager {
                     }
                     let meals = day.meals?.allObjects as? [MealEntity] ?? []
                     completion(meals)
+                } catch {
+                    print("Error: \(error)")
+                    completion([])
+                }
+            }
+        }
+    }
+    
+    func dayEntity(for date: Date, completion: @escaping ((DayEntity?) -> ())) throws {
+        Task {
+            let bgContext =  newBackgroundContext()
+            await bgContext.perform {
+
+                do {
+                    guard let day = try self.fetchDayEntity(for: date, context: bgContext) else {
+                        completion(nil)
+                        return
+                    }
+                    completion(day)
+//                    let meals = day.meals?.allObjects as? [MealEntity] ?? []
+//                    completion(meals)
+                } catch {
+                    print("Error: \(error)")
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
+    func dayEntities(for range: Range<Date>, completion: @escaping (([DayEntity]) -> ())) throws {
+        Task {
+            let bgContext =  newBackgroundContext()
+            await bgContext.perform {
+
+                do {
+                    let days = try self.fetchDayEntities(for: range, context: bgContext)
+                    completion(days)
                 } catch {
                     print("Error: \(error)")
                     completion([])
