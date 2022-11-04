@@ -13,6 +13,8 @@ extension DataManager {
         let form = SyncForm(
             updates: updates,
             deletions: deletions,
+            daysLowerBound: daysToSync?.lowerBound.calendarDayString,
+            daysUpperBound: daysToSync?.upperBound.calendarDayString,
             userId: userId,
             versionTimestamp: versionTimestamp
         )

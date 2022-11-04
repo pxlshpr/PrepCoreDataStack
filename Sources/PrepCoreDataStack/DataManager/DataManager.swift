@@ -5,11 +5,11 @@ import PrepDataTypes
 public class DataManager: ObservableObject {
     
     public static let shared = DataManager()
-    
     let coreDataManager: CoreDataManager
-    
     @Published internal(set) public var user: User? = nil
 
+    public var daysToSync: Range<Date>? = nil
+    
     convenience init() {
         self.init(coreDataManager: CoreDataManager())
         coreDataManager.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
