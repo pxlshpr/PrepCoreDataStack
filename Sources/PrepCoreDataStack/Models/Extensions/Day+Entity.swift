@@ -28,6 +28,11 @@ extension DayEntity {
     var dayMeals: [DayMeal] {
         mealEntities
             .map { DayMeal(from: $0) }
-            .sorted(by: { $0.time < $1.time })
+            .sorted { (lhs, rhs) in
+                if lhs.time == rhs.time {
+                    return lhs.id.uuidString < rhs.id.uuidString
+                }
+                return lhs.time < rhs.time
+            }
     }
 }
