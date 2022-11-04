@@ -147,10 +147,10 @@ extension DataManager {
                 if let user = updates.user {
                     try self.updateUser(with: user, in: bgContext)
                 }
-                if let days = updates.days {
+                if let days = updates.days, !days.isEmpty {
                     try self.createOrUpdateDays(days, in: bgContext)
                 }
-                if let meals = updates.meals {
+                if let meals = updates.meals, !meals.isEmpty {
                     try self.createOrUpdateMeals(meals, in: bgContext)
                 }
                 
