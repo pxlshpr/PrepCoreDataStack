@@ -19,7 +19,7 @@ public extension DataManager {
         let mealEntity = try coreDataManager.saveMealEntity(named: name, at: time, on: date, for: user.id)
 
         /// Now send a notification named`didAddMeal` with the new `Meal` as a user info
-        /// The `ListPage` and `TimelinePage` should subscribe to notifications of this
+        /// The `MealsList` and `TimelinePage` should subscribe to notifications of this
         /// Once received, they should get the `Meal` and see if it matches `Date` it is displaying
         /// If it matches—it should then insert the `Meal` into the correct position with an animation
         let meal = Meal(from: mealEntity)
