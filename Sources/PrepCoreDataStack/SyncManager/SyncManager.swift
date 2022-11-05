@@ -1,11 +1,11 @@
 import Foundation
 import PrepDataTypes
 
-let SyncInterval = 5.0
+let SyncInterval = 1.0
 
 public class SyncManager {
     
-    let networkManager = NetworkManager.local
+    let networkManager = NetworkManager.server
     let dataManager = DataManager.shared
 
     public static let shared = SyncManager()
@@ -35,7 +35,9 @@ public class SyncManager {
         Task {
             do {
                 let deviceSyncForm = try await dataManager.constructSyncForm()
-                print("📱→ Sending \(deviceSyncForm.description)")
+                if !deviceSyncForm.isEmpty {
+                    print("📱→ Sending \(deviceSyncForm.description)")
+                }
                 let serverSyncForm = try await postSyncForm(deviceSyncForm)
                 try await dataManager.process(serverSyncForm, sentFor: deviceSyncForm)
             } catch NetworkManagerError.httpError(let statusCode) {

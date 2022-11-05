@@ -45,10 +45,16 @@ extension DataManager {
                 if let mealEntities = updatedEntities.mealEntities {
                     meals = mealEntities.map { Meal(from: $0) }
                 }
+                
+                var foods: [Food]? = nil
+                if let foodEntities = updatedEntities.foodEntities {
+                    foods = foodEntities.map { Food(from: $0) }
+                }
 
                 let updated = SyncForm.Updates(
                     user: user,
                     days: days,
+                    foods: foods,
                     meals: meals
                 )
 
@@ -89,6 +95,11 @@ extension DataManager {
                                                                context: bgContext)
                 }
                 
+                if let foods = updates.foods {
+                    try self.coreDataManager.markFoodsAsSynced(ids: foods.map({ $0.id }),
+                                                               context: bgContext)
+                }
+                
                 try bgContext.save()
             } catch {
                 print("Error marking updates as synced: \(error)")
@@ -100,6 +111,7 @@ extension DataManager {
     func proceedWithDeletions(_ deletions: SyncForm.Deletions) async {
         
     }
+    
     func completeSync(for syncForm: SyncForm) async {
         if let updates = syncForm.updates {
             await markUpdatesAsSynced(updates)
@@ -114,8 +126,10 @@ extension DataManager {
         guard let _ = user?.id else {
             throw SyncError.syncPerformedWithoutFetchedUser
         }
-        
-        print("💧→ Received \(serverSyncForm.description)")
+
+        if !serverSyncForm.isEmpty {
+            print("💧→ Received \(serverSyncForm.description)")
+        }
 
         if let updates = serverSyncForm.updates {
             try await processUpdates(updates)
@@ -154,6 +168,10 @@ extension DataManager {
                 }
                 if let meals = updates.meals, !meals.isEmpty {
                     try self.createOrUpdateMeals(meals, in: bgContext)
+                }
+                
+                if let foods = updates.foods, !foods.isEmpty {
+                    try self.createOrUpdateFoods(foods, in: bgContext)
                 }
                 
             } catch {
@@ -249,4 +267,34 @@ extension DataManager {
         ///     we don't need to post notifications about this right now (Diary View will simply get meals being added)
     }
 
+    //MARK: - Foods
+    func createOrUpdateFoods(_ foods: [Food], in context: NSManagedObjectContext) throws {
+        try foods.forEach { food in
+            try createOrUpdateFood(food, in: context)
+        }
+
+        /// Send a notification on the main thread
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: .didUpdateFoods,
+                object: nil,
+                userInfo: [Notification.Keys.foods: foods]
+            )
+        }
+    }
+    
+    func createOrUpdateFood(_ serverFood: Food, in context: NSManagedObjectContext) throws {
+        if let _ = try coreDataManager.foodEntity(with: serverFood.id, context: context) {
+            print("📝 Updating existing Meal (Not implemented yet!)")
+            /// [ ] We should be updating foods for when the metadata such as `lastUsedAt` and `numberOfTimesUsedGlobally` or `publishedStatus` changes
+            /// [ ] Detect when our foods go from `pendingVerifiation` to a result and notify the user—if not here, at least when it occurs on the server's end!
+//            try food.update(with: serverFood, in: context)
+        } else {
+            let foodEntity = FoodEntity(context: context, food: serverFood)
+            print("✨ Inserting Food")
+            context.insert(foodEntity)
+        }
+        
+        try context.save()
+    }
 }
