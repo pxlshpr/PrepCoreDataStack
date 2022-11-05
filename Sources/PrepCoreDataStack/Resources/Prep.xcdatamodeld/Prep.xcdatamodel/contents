@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21512" systemVersion="21G83" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="BarcodeEntity" representedClassName="BarcodeEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="payload" attributeType="String"/>
+        <attribute name="symbology" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="food" maxCount="1" deletionRule="Nullify" destinationEntity="FoodEntity" inverseName="barcodes" inverseEntity="FoodEntity"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
     <entity name="DayEntity" representedClassName="DayEntity" syncable="YES" codeGenerationType="class">
         <attribute name="addEnergyExpendituresToGoal" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="calendarDayString" attributeType="String"/>
@@ -8,19 +19,27 @@
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="meals" toMany="YES" deletionRule="Nullify" destinationEntity="MealEntity" inverseName="day" inverseEntity="MealEntity"/>
+        <relationship name="meals" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MealEntity" inverseName="day" inverseEntity="MealEntity"/>
     </entity>
-    <entity name="FoodEntity" representedClassName="PrepCoreDataStack.UserFoodEntity" syncable="YES" codeGenerationType="class">
-        <attribute name="barcodes" optional="YES" attributeType="String"/>
+    <entity name="FoodEntity" representedClassName="PrepCoreDataStack.FoodEntity" syncable="YES" codeGenerationType="class">
         <attribute name="brand" optional="YES" attributeType="String"/>
+        <attribute name="dataset" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="detail" optional="YES" attributeType="String"/>
         <attribute name="emoji" attributeType="String"/>
+        <attribute name="firstUsedAt" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="info" attributeType="Binary"/>
-        <attribute name="jsonSyncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="jsonSyncStatus" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastUsedAt" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
-        <attribute name="publishStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="numberOfTimesConsumed" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="numberOfTimesConsumedGlobally" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="publishStatus" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="type" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="barcodes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="BarcodeEntity" inverseName="food" inverseEntity="BarcodeEntity"/>
     </entity>
     <entity name="ImageFileEntity" representedClassName="ImageFileEntity" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
@@ -36,11 +55,6 @@
         <attribute name="time" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="day" maxCount="1" deletionRule="Nullify" destinationEntity="DayEntity" inverseName="meals" inverseEntity="DayEntity"/>
-        <uniquenessConstraints>
-            <uniquenessConstraint>
-                <constraint value="id"/>
-            </uniquenessConstraint>
-        </uniquenessConstraints>
     </entity>
     <entity name="UserEntity" representedClassName="UserEntity" syncable="YES" codeGenerationType="class">
         <attribute name="bodyMeasurements" attributeType="Binary"/>
@@ -51,10 +65,5 @@
         <attribute name="prefersMetricUnits" attributeType="Boolean" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
-        <uniquenessConstraints>
-            <uniquenessConstraint>
-                <constraint value="id"/>
-            </uniquenessConstraint>
-        </uniquenessConstraints>
     </entity>
 </model>

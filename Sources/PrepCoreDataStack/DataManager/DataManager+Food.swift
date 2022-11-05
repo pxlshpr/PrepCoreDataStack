@@ -1,6 +1,5 @@
 import Foundation
 import PrepDataTypes
-import PrepFoodForm
 
 public extension DataManager {
     func addNewFood(_ userFood: UserFood) throws {

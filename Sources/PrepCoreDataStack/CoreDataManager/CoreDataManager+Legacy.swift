@@ -3,26 +3,26 @@ import CoreData
 
 extension CoreDataManager {
     
-    func recentUserFoods() throws -> [UserFoodEntity] {
-        var recents: [UserFoodEntity] = []
-        try viewContext.performAndWait {
-            let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFoodEntity")
-            let entities = try viewContext.fetch(fetchRequest)
-            recents = entities
-        }
-        return recents
-    }
-
-    func _recentUserFoods() async throws -> [UserFoodEntity] {
-        let bgContext = newBackgroundContext()
-        var recents: [UserFoodEntity] = []
-        try bgContext.performAndWait {
-            let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFoodEntity")
-            let entities = try bgContext.fetch(fetchRequest)
-            recents = entities
-        }
-        return recents
-    }
+//    func recentUserFoods() throws -> [UserFoodEntity] {
+//        var recents: [UserFoodEntity] = []
+//        try viewContext.performAndWait {
+//            let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFoodEntity")
+//            let entities = try viewContext.fetch(fetchRequest)
+//            recents = entities
+//        }
+//        return recents
+//    }
+//
+//    func _recentUserFoods() async throws -> [UserFoodEntity] {
+//        let bgContext = newBackgroundContext()
+//        var recents: [UserFoodEntity] = []
+//        try bgContext.performAndWait {
+//            let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFoodEntity")
+//            let entities = try bgContext.fetch(fetchRequest)
+//            recents = entities
+//        }
+//        return recents
+//    }
     
     //MARK: UserFood
 //    func userFoods() async throws -> [UserFoodEntity] {
@@ -34,10 +34,10 @@ extension CoreDataManager {
 //        return entities
 //    }
 //
-    func saveUserFood(entity: UserFoodEntity, context: NSManagedObjectContext) throws {
-        context.insert(entity)
-        try context.save()
-    }
+//    func saveUserFood(entity: UserFoodEntity, context: NSManagedObjectContext) throws {
+//        context.insert(entity)
+//        try context.save()
+//    }
 //
 //    func userFoodsToSync() async throws -> [UserFoodEntity] {
 //        let fetchRequest = NSFetchRequest<UserFoodEntity>(entityName: "UserFoodEntity")
