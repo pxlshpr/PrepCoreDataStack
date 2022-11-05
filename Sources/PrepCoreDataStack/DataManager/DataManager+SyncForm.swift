@@ -106,20 +106,27 @@ protocol Syncable: NSManagedObject, Fetchable {
     var syncStatus: Int16 { get set }
 }
 
+
+extension Syncable {
+    static var entityName : String {
+        return NSStringFromClass(self).components(separatedBy: ".").last!
+    }
+}
+
 extension MealEntity: Syncable {
-    static var entityName: String { "MealEntity" }
+//    static var entityName: String { "MealEntity" }
 }
 
 extension FoodEntity: Syncable {
-    static var entityName: String { "FoodEntity" }
+//    static var entityName: String { "FoodEntity" }
 }
 
 extension ImageFileEntity: Syncable {
-    static var entityName: String { "ImageFileEntity" }
+//    static var entityName: String { "ImageFileEntity" }
 }
 
 extension JSONFileEntity: Syncable {
-    static var entityName: String { "JSONFileEntity" }
+//    static var entityName: String { "JSONFileEntity" }
 }
 
 extension Meal: EntityRepresentable {
@@ -218,50 +225,20 @@ extension DataManager {
         }
     }
     
-    func setNotSyncedFilesAsSyncing() async throws {
-        let files = try await getFilesWithSyncStatus(.notSynced)
+    func setFiles(_ syncStatus: SyncStatus, to newSyncStatus: SyncStatus) async throws {
+        let files = try await getFilesWithSyncStatus(syncStatus)
         let bgContext = coreDataManager.newBackgroundContext()
         await bgContext.perform {
             do {
-                try files.imageFiles.setSyncStatus(to: .syncing, in: bgContext)
-                try files.imageFiles.setSyncStatus(to: .syncing, in: bgContext)
-//                try self.coreDataManager.markImagesAsSyncing(
-//                    ids: pendingFiles.images,
-//                    context: bgContext
-//                )
-//                try self.coreDataManager.markJSONsAsSyncing(
-//                    ids: pendingFiles.jsons,
-//                    context: bgContext
-//                )
+                try files.imageFiles.setSyncStatus(to: newSyncStatus, in: bgContext)
+                try files.jsonFiles.setSyncStatus(to: newSyncStatus, in: bgContext)
                 try bgContext.save()
             } catch {
-                print("Error marking updates as sync pending: \(error)")
+                print("Error setting \(syncStatus) files to \(newSyncStatus): \(error)")
             }
         }
     }
-    
-    func setSyncingFilesToSynced() async throws {
-        let files = try await getFilesWithSyncStatus(.syncing)
-        let bgContext = coreDataManager.newBackgroundContext()
-        await bgContext.perform {
-            do {
-                try files.imageFiles.setSyncStatus(to: .synced, in: bgContext)
-                try files.imageFiles.setSyncStatus(to: .synced, in: bgContext)
-//                try self.coreDataManager.markImagesAsSynced(
-//                    ids: pendingFiles.images,
-//                    context: bgContext
-//                )
-//                try self.coreDataManager.markJSONsAsSynced(
-//                    ids: pendingFiles.jsons,
-//                    context: bgContext
-//                )
-                try bgContext.save()
-            } catch {
-                print("Error marking updates as synced: \(error)")
-            }
-        }
-    }
-    
+
     func process(_ serverSyncForm: SyncForm, sentFor deviceSyncForm: SyncForm) async throws {
         guard let _ = user?.id else {
             throw SyncError.syncPerformedWithoutFetchedUser
