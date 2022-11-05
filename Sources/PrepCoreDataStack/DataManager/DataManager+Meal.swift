@@ -13,7 +13,6 @@ public extension DataManager {
             throw DataManagerError.noUserFound
         }
         
-        //TODO: We need to know what the current day is, assuming it to be today for now
         /// Construct the new `Meal`
         /// Pass this to CoreData manager as a `MealEntity`, which would create the `DayEntity` if needed
         let mealEntity = try coreDataManager.saveMealEntity(named: name, at: time, on: date, for: user.id)
