@@ -13,3 +13,9 @@ public extension ImageFile {
         self.syncStatus = SyncStatus(rawValue: entity.syncStatus)!
     }
 }
+
+public extension ImageFile {
+    func getUrl() throws -> URL {
+        try imageUrl(for: id)
+    }
+}

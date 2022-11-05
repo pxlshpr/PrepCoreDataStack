@@ -5,7 +5,7 @@ let SyncInterval = 1.0
 
 public class SyncManager {
     
-    let networkManager = NetworkManager.server
+    let networkManager = NetworkManager.local
     let dataManager = DataManager.shared
 
     public static let shared = SyncManager()
@@ -38,7 +38,7 @@ public class SyncManager {
                 //TODO: Mark objects being synced as pending so we don't re-fetch them during the sync
                 try await sendAndReceiveSyncForms()
                 try await uploadPendingFiles()
-                try await dataManager.markFilesAsUploaded()
+                try await dataManager.setSyncingFilesToSynced()
                 
             } catch NetworkManagerError.httpError(let statusCode) {
                 let status = statusCode != nil ? "\(statusCode!)" : "[no status code]"
@@ -52,34 +52,45 @@ public class SyncManager {
     }
     
     func uploadPendingFiles() async throws {
-        let pendingFiles = try await dataManager.getFilesNotSynced()
-        print("🐔 We're here with: \(pendingFiles.images.count) images and \(pendingFiles.jsons.count) json")
+        let pendingFiles = try await dataManager.getFilesWithSyncStatus(.notSynced)
+        print("🐔 We're here with: \(pendingFiles.imageFiles.count) images and \(pendingFiles.jsonFiles.count) json")
         
         //TODO: Add concurrency
         
-        /// Mark the files we'll be uploading as `syncPending`
+        /// Mark the files we'll be uploading as `syncing`
         /// so that subsequent calls are prevented from uploading them
-        try await dataManager.markedNotSyncedFilesAsPending()
+        try await dataManager.setNotSyncedFilesAsSyncing()
         
-        for id in pendingFiles.jsons {
+        for jsonFile in pendingFiles.jsonFiles {
             
             /// Load json data from file
-            let url = try jsonUrl(for: id)
+            //TODO: Get JSONFile to return this
+            let url = try jsonFile.getUrl()
+            
             let data = try Data(contentsOf: url)
             
             /// Get the `NetworkManager` to post it
-            let _ = try await networkManager.postFile(type: .json, data: data, id: id)
-            print("json file \(id) was uploaded")
+            let _ = try await networkManager.postFile(
+                type: .json,
+                data: data,
+                id: jsonFile.id
+            )
+            print("json file \(jsonFile.id) was uploaded")
         }
         
-        for id in pendingFiles.images {
+        for imageFile in pendingFiles.imageFiles {
+            
             /// Load image data from file
-            let url = try imageUrl(for: id)
+            let url = try imageFile.getUrl()
             let data = try Data(contentsOf: url)
             
             /// Get the `NetworkManager` to post it
-            let _ = try await networkManager.postFile(type: .image, data: data, id: id)
-            print("image file \(id) was uploaded")
+            let _ = try await networkManager.postFile(
+                type: .image,
+                data: data,
+                id: imageFile.id
+            )
+            print("image file \(imageFile.id) was uploaded")
         }
         
         return

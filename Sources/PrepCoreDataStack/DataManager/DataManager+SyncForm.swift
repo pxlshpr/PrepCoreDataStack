@@ -1,5 +1,6 @@
 import Foundation
 import PrepDataTypes
+import CoreData
 
 extension DataManager {
 
@@ -76,6 +77,92 @@ extension DataManager {
 
 import CoreData
 
+protocol Fetchable {
+    associatedtype FetchableType: NSManagedObject = Self
+
+    static var entityName : String { get }
+    static func objects(for predicate: NSPredicate?, in context: NSManagedObjectContext) throws -> [FetchableType]
+}
+
+extension Fetchable where Self : NSManagedObject, FetchableType == Self {
+    static var entityName : String {
+        return NSStringFromClass(self).components(separatedBy: ".").last!
+    }
+    
+    static func objects(for predicate: NSPredicate?, in context: NSManagedObjectContext) throws -> [FetchableType] {
+        let request = NSFetchRequest<FetchableType>(entityName: entityName)
+        request.predicate = predicate
+        return try context.fetch(request)
+    }
+}
+
+protocol EntityRepresentable {
+    associatedtype T: Syncable
+    var id: UUID { get }
+    static var entityType: T.Type { get }
+}
+
+protocol Syncable: NSManagedObject, Fetchable {
+    var syncStatus: Int16 { get set }
+}
+
+extension MealEntity: Syncable {
+    static var entityName: String { "MealEntity" }
+}
+
+extension FoodEntity: Syncable {
+    static var entityName: String { "FoodEntity" }
+}
+
+extension ImageFileEntity: Syncable {
+    static var entityName: String { "ImageFileEntity" }
+}
+
+extension JSONFileEntity: Syncable {
+    static var entityName: String { "JSONFileEntity" }
+}
+
+extension Meal: EntityRepresentable {
+    static var entityType: MealEntity.Type { MealEntity.self }
+}
+
+extension Food: EntityRepresentable {
+    static var entityType: FoodEntity.Type { FoodEntity.self }
+}
+
+extension ImageFile: EntityRepresentable {
+    static var entityType: ImageFileEntity.Type { ImageFileEntity.self }
+}
+
+extension JSONFile: EntityRepresentable {
+    static var entityType: JSONFileEntity.Type { JSONFileEntity.self }
+}
+
+extension Array where Element : EntityRepresentable {
+    
+    func setSyncStatus(to syncStatus: SyncStatus, in context: NSManagedObjectContext) throws {
+        let predicate = NSPredicate(format: "id IN %@", self.map({$0.id}))
+        guard let objects = try Element.entityType.objects(for: predicate, in: context) as? [any Syncable] else {
+            return
+        }
+        for object in objects {
+            object.syncStatus = syncStatus.rawValue
+        }
+    }
+
+    func setAsNotSynced(in context: NSManagedObjectContext) throws {
+        try setSyncStatus(to: .notSynced, in: context)
+    }
+
+    func setAsSyncing(in context: NSManagedObjectContext) throws {
+        try setSyncStatus(to: .syncing, in: context)
+    }
+
+    func setAsSynced(in context: NSManagedObjectContext) throws {
+        try setSyncStatus(to: .synced, in: context)
+    }
+}
+
 extension DataManager {
     
     /// Go through any updates that we had sent and mark their `syncStatus` and `synced`
@@ -91,13 +178,22 @@ extension DataManager {
                                                               context: bgContext)
                 }
                 if let meals = updates.meals {
-                    try self.coreDataManager.markMealsAsSynced(mealIds: meals.map({$0.id}),
-                                                               context: bgContext)
+                    try meals.setAsSynced(in: bgContext)
+//                    try meals.setAsSynced(in: bgContext)
+//                    try self.coreDataManager.setSyncStatus(
+//                        for: MealEntity.self,
+//                        with: meals.map({$0.id}),
+//                        to: .synced,
+//                        in: bgContext
+//                    )
+//                    try self.coreDataManager.markMealsAsSynced(mealIds: meals.map({$0.id}),
+//                                                               context: bgContext)
                 }
                 
                 if let foods = updates.foods {
-                    try self.coreDataManager.markFoodsAsSynced(ids: foods.map({ $0.id }),
-                                                               context: bgContext)
+                    try foods.setAsSynced(in: bgContext)
+//                    try self.coreDataManager.markFoodsAsSynced(ids: foods.map({ $0.id }),
+//                                                               context: bgContext)
                 }
                 
                 try bgContext.save()
@@ -122,19 +218,21 @@ extension DataManager {
         }
     }
     
-    func markedNotSyncedFilesAsPending() async throws {
-        let pendingFiles = try await getFilesNotSynced()
+    func setNotSyncedFilesAsSyncing() async throws {
+        let files = try await getFilesWithSyncStatus(.notSynced)
         let bgContext = coreDataManager.newBackgroundContext()
         await bgContext.perform {
             do {
-                try self.coreDataManager.markImagesAsSyncPending(
-                    ids: pendingFiles.images,
-                    context: bgContext
-                )
-                try self.coreDataManager.markJSONsAsSyncPending(
-                    ids: pendingFiles.jsons,
-                    context: bgContext
-                )
+                try files.imageFiles.setSyncStatus(to: .syncing, in: bgContext)
+                try files.imageFiles.setSyncStatus(to: .syncing, in: bgContext)
+//                try self.coreDataManager.markImagesAsSyncing(
+//                    ids: pendingFiles.images,
+//                    context: bgContext
+//                )
+//                try self.coreDataManager.markJSONsAsSyncing(
+//                    ids: pendingFiles.jsons,
+//                    context: bgContext
+//                )
                 try bgContext.save()
             } catch {
                 print("Error marking updates as sync pending: \(error)")
@@ -142,19 +240,21 @@ extension DataManager {
         }
     }
     
-    func markFilesAsUploaded() async throws {
-        let pendingFiles = try await getFilesNotSynced()
+    func setSyncingFilesToSynced() async throws {
+        let files = try await getFilesWithSyncStatus(.syncing)
         let bgContext = coreDataManager.newBackgroundContext()
         await bgContext.perform {
             do {
-                try self.coreDataManager.markImagesAsSynced(
-                    ids: pendingFiles.images,
-                    context: bgContext
-                )
-                try self.coreDataManager.markJSONsAsSynced(
-                    ids: pendingFiles.jsons,
-                    context: bgContext
-                )
+                try files.imageFiles.setSyncStatus(to: .synced, in: bgContext)
+                try files.imageFiles.setSyncStatus(to: .synced, in: bgContext)
+//                try self.coreDataManager.markImagesAsSynced(
+//                    ids: pendingFiles.images,
+//                    context: bgContext
+//                )
+//                try self.coreDataManager.markJSONsAsSynced(
+//                    ids: pendingFiles.jsons,
+//                    context: bgContext
+//                )
                 try bgContext.save()
             } catch {
                 print("Error marking updates as synced: \(error)")

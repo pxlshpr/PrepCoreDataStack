@@ -54,21 +54,21 @@ extension CoreDataManager {
         }
     }
 
-    func markImagesAsSyncPending(ids: [UUID], context: NSManagedObjectContext) throws {
+    func markImagesAsSyncing(ids: [UUID], context: NSManagedObjectContext) throws {
         let request = NSFetchRequest<ImageFileEntity>(entityName: "ImageFileEntity")
         request.predicate = NSPredicate(format: "id IN %@", ids)
         let imageFileEntities = try context.fetch(request)
         for imageFileEntity in imageFileEntities {
-            imageFileEntity.syncStatus = SyncStatus.syncPending.rawValue
+            imageFileEntity.syncStatus = SyncStatus.syncing.rawValue
         }
     }
 
-    func markJSONsAsSyncPending(ids: [UUID], context: NSManagedObjectContext) throws {
+    func markJSONsAsSyncing(ids: [UUID], context: NSManagedObjectContext) throws {
         let request = NSFetchRequest<JSONFileEntity>(entityName: "JSONFileEntity")
         request.predicate = NSPredicate(format: "id IN %@", ids)
         let entities = try context.fetch(request)
         for entity in entities {
-            entity.syncStatus = SyncStatus.syncPending.rawValue
+            entity.syncStatus = SyncStatus.syncing.rawValue
         }
     }
 
@@ -83,11 +83,19 @@ extension CoreDataManager {
     
     //MARK: - Cleaned
     
-    func entities<T: NSManagedObject>(ofType entity: T.Type, withIds ids: [UUID], in context: NSManagedObjectContext) throws -> [T] {
+    func setSyncStatus<T: Syncable>(
+        for entity: T.Type,
+        with ids: [UUID],
+        to syncStatus: SyncStatus,
+        in context: NSManagedObjectContext
+    ) throws {
         let entityName = String(describing: entity)
         let request = NSFetchRequest<T>(entityName: entityName)
         request.predicate = NSPredicate(format: "id IN %@", ids)
-        return try context.fetch(request)
+        let entities = try context.fetch(request)
+        for entity in entities {
+            entity.syncStatus = syncStatus.rawValue
+        }
     }
 
 }

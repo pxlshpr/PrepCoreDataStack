@@ -13,3 +13,9 @@ public extension JSONFile {
         self.syncStatus = SyncStatus(rawValue: entity.syncStatus)!
     }
 }
+
+public extension JSONFile {
+    func getUrl() throws -> URL {
+        try jsonUrl(for: id)
+    }
+}
