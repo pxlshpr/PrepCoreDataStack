@@ -16,8 +16,7 @@ public class FoodFormManager {
     
     public func save(_ formOutput: FoodFormOutput) throws {
         
-        let userFood = UserFood(from: formOutput.createForm)
-        try DataManager.shared.addNewFood(userFood)
+        try DataManager.shared.addNewFood(fromForm: formOutput.createForm)
 
 //        let entity = UserFoodEntity(context: backgroundContext, userFood: userFood)
 //        try await DataManager.shared.save(userFood: formOutput.createForm)

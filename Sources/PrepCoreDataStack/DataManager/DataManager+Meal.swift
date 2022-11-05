@@ -13,14 +13,16 @@ public extension DataManager {
             throw DataManagerError.noUserFound
         }
         
-        /// Construct the new `Meal`
-        /// Pass this to CoreData manager as a `MealEntity`, which would create the `DayEntity` if needed
-        let mealEntity = try coreDataManager.saveMealEntity(named: name, at: time, on: date, for: user.id)
+        /// Pass the details to `CoreDataManager`, which would return the created `MealEntity`
+        /// after creating and linking a newly created `DayEntity` if needed
+        let mealEntity = try coreDataManager.createAndSaveMealEntity(
+            named: name,
+            at: time,
+            on: date,
+            for: user.id
+        )
 
-        /// Now send a notification named`didAddMeal` with the new `Meal` as a user info
-        /// The `MealsList` and `TimelinePage` should subscribe to notifications of this
-        /// Once received, they should get the `Meal` and see if it matches `Date` it is displaying
-        /// If it matches—it should then insert the `Meal` into the correct position with an animation
+        /// Send a notification named`didAddMeal` with the new `Meal`
         let meal = Meal(from: mealEntity)
         NotificationCenter.default.post(
             name: .didAddMeal,
@@ -29,8 +31,6 @@ public extension DataManager {
                 Notification.Keys.meal: meal
             ]
         )
-
-        /// Now handle the Syncer to send, and receive on both the device and the server
     }
     
     func getMealsForDate(_ date: Date) async throws -> [Meal] {

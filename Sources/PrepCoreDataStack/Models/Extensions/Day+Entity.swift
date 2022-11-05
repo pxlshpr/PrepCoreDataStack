@@ -18,21 +18,3 @@ public extension Day {
         )
     }
 }
-
-extension DayEntity {
-    
-    var mealEntities: [MealEntity] {
-        meals?.allObjects as? [MealEntity] ?? []
-    }
-    
-    var dayMeals: [DayMeal] {
-        mealEntities
-            .map { DayMeal(from: $0) }
-            .sorted { (lhs, rhs) in
-                if lhs.time == rhs.time {
-                    return lhs.id.uuidString < rhs.id.uuidString
-                }
-                return lhs.time < rhs.time
-            }
-    }
-}

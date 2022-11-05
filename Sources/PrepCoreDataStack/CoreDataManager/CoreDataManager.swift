@@ -19,5 +19,9 @@ class CoreDataManager: NSPersistentContainer {
                 fatalError("Failed to load CoreData: \(err)")
             }
         }
-    }    
+    }
+    
+    func save() throws {
+        try self.viewContext.save()
+    }
 }

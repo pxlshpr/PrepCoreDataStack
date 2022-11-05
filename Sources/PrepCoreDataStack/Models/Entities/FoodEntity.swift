@@ -24,32 +24,32 @@ extension FoodEntity {
         self.type = Int16(food.type.rawValue)
         self.updatedAt = food.updatedAt
     }
-    
-//    convenience init(
-//        context: NSManagedObjectContext,
-//        name: String,
-//        time: Date,
-//        dayEntity: DayEntity
-//    ) {
-//        self.init(context: context)
-//        self.id = UUID()
-//        self.name = name
-//        self.time = time.timeIntervalSince1970
-//        self.markedAsEatenAt = 0
-//        self.updatedAt = Date().timeIntervalSince1970
-//        self.deletedAt = 0
-//        self.day = dayEntity
-//        self.syncStatus = SyncStatus.notSynced.rawValue
-//    }
 }
 
-extension FoodEntity {
-//    func update(with serverMeal: Meal, in context: NSManagedObjectContext) throws {
-//        id = serverMeal.id
-//        name = serverMeal.name
-//        time = serverMeal.time
-//        markedAsEatenAt = serverMeal.markedAsEatenAt ?? 0
-//        updatedAt = serverMeal.updatedAt
-//        syncStatus = SyncStatus.synced.rawValue
-//    }
+//MARK: UserFoodCreateForm → FoodEntity
+public extension FoodEntity {
+    convenience init(context: NSManagedObjectContext, form: UserFoodCreateForm) {
+        self.init(context: context)
+        
+        /// Form Values
+        self.brand = form.brand
+        self.detail = form.detail
+        self.emoji = form.emoji
+        self.id = form.id
+        self.info = try! JSONEncoder().encode(form.info)
+        self.name = form.name
+        self.publishStatus = form.publishStatus.rawValue
+        
+        /// Preset values for newly inserted User `Food`s
+        self.type = FoodType.rawFood.rawValue
+        self.dataset = 0
+        self.numberOfTimesConsumedGlobally = 0
+        self.numberOfTimesConsumed = 0
+        self.syncStatus = SyncStatus.notSynced.rawValue
+        self.jsonSyncStatus = SyncStatus.notSynced.rawValue
+        self.updatedAt = Date().timeIntervalSince1970
+        self.deletedAt = 0
+        self.firstUsedAt = 0
+        self.lastUsedAt = 0
+    }
 }
