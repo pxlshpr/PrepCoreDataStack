@@ -5,7 +5,7 @@ let SyncInterval = 1.0
 
 public class SyncManager {
     
-    let networkManager = NetworkManager.local
+    let networkManager = NetworkManager.server
     let dataManager = DataManager.shared
 
     public static let shared = SyncManager()
@@ -35,6 +35,7 @@ public class SyncManager {
         Task {
             do {
                 
+                //TODO: Mark objects being synced as pending so we don't re-fetch them during the sync
                 try await sendAndReceiveSyncForms()
                 try await uploadPendingFiles()
                 try await dataManager.markFilesAsUploaded()

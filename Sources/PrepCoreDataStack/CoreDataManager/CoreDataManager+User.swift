@@ -80,6 +80,16 @@ extension CoreDataManager {
             mealEntity.syncStatus = SyncStatus.synced.rawValue
         }
     }
+    
+    //MARK: - Cleaned
+    
+    func entities<T: NSManagedObject>(ofType entity: T.Type, withIds ids: [UUID], in context: NSManagedObjectContext) throws -> [T] {
+        let entityName = String(describing: entity)
+        let request = NSFetchRequest<T>(entityName: entityName)
+        request.predicate = NSPredicate(format: "id IN %@", ids)
+        return try context.fetch(request)
+    }
+
 }
 
 extension CoreDataManager {
