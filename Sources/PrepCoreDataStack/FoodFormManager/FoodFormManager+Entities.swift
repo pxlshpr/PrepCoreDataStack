@@ -2,25 +2,16 @@ import Foundation
 import PrepDataTypes
 
 extension FoodFormManager {
-//    func saveUserFoodEntity(_ createForm: UserFoodCreateForm, uuid: UUID) async -> Result<FoodSaveStep, FoodSaveError> {
-//        let userFood = UserFood(from: createForm)
-//        do {
-//            try await DataManager.shared.save(userFood: userFood)
-//            try await DataManager.shared.refresh()
-//            return .success(.saveUserFoodEntity)
-//        } catch {
-//            return .failure(.saveUserFoodEntityError(error))
-//        }
-//    }
-//    
-//    func saveImageFileEntity(for uuid: UUID) async -> Result<FoodSaveStep, FoodSaveError> {
-//        let imageFile = ImageFile(id: uuid, syncStatus: .notSynced)
-//        do {
-//            try await DataManager.shared.save(imageFile: imageFile)
-//            try await DataManager.shared.refresh()
-//            return .success(.saveUserFoodImageEntity(uuid))
-//        } catch {
-//            return .failure(.saveImageFileEntityError(error))
-//        }
-//    }
+    func saveImageFileEntity(for uuid: UUID) throws {
+        let imageFile = ImageFile(id: uuid, syncStatus: .notSynced)
+        try DataManager.shared.addNewImageFile(imageFile)
+        print("💾 Created ImageFileEntity for \(uuid.uuidString)")
+    }
+
+    func saveJSONFileEntity(for uuid: UUID) throws {
+        let jsonFile = JSONFile(id: uuid, syncStatus: .notSynced)
+        try DataManager.shared.addNewJSONFile(jsonFile)
+        print("💾 Created JSONFileEntity for \(uuid.uuidString)")
+    }
+
 }

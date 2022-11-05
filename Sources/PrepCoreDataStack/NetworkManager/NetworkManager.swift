@@ -28,13 +28,17 @@ public class NetworkManager {
     public static var local = NetworkManager(isLocal: true)
     public static var server = NetworkManager(isLocal: false)
     
-    func post(_ encodable: Encodable, to endpoint: Endpoint) async throws -> Data? {
-        guard let post = postRequestForEncodable(encodable, to: endpoint) else {
+    func post(_ encodable: Encodable, to endpoint: Endpoint) async throws -> Data {
+        guard let request = postRequestForEncodable(encodable, to: endpoint) else {
             throw NetworkManagerError.failedToCreatePostRequest
         }
         
+        return try await post(request: request)
+    }
+    
+    func post(request: URLRequest) async throws -> Data {
         do {
-            let (data, response) = try await URLSession.shared.data(for: post)
+            let (data, response) = try await URLSession.shared.data(for: request)
             guard response.httpResponse?.isSuccessful == true else {
                 throw NetworkManagerError.httpError(response.httpResponse?.statusCode)
             }

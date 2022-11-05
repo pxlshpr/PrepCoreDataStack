@@ -2,7 +2,17 @@ import Foundation
 import CoreData
 
 extension CoreDataManager {
- 
+
+    func saveImageFileEntity(_ entity: ImageFileEntity) throws {
+        viewContext.insert(entity)
+        try viewContext.save()
+    }
+
+    func saveJSONFileEntity(_ entity: JSONFileEntity) throws {
+        viewContext.insert(entity)
+        try viewContext.save()
+    }
+
     func insertFoodEntity(_ entity: FoodEntity) {
         viewContext.insert(entity)
     }

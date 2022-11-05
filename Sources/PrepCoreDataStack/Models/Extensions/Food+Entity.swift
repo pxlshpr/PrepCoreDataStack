@@ -5,19 +5,8 @@ import PrepDataTypes
 public extension Food {
     init(from entity: FoodEntity) {
         
-//        let day = Day(from: entity.day!)
-//        self.init(
-//            id: entity.id!,
-//            day: day,
-//            name: entity.name!,
-//            time: entity.time,
-//            markedAsEatenAt: entity.markedAsEatenAt,
-//            foodItems: [],
-//            syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
-//            updatedAt: entity.updatedAt,
-//            deletedAt: entity.deletedAt
-//        )
-        let barcodes: [Barcode] = []
+        let barcodeEntities: [BarcodeEntity] = entity.barcodes?.allObjects as? [BarcodeEntity] ?? []
+        let barcodes = barcodeEntities.map { Barcode(from: $0) }
         self.init(
             id: entity.id!,
             type: FoodType(rawValue: entity.type)!,

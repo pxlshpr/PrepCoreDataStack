@@ -171,7 +171,7 @@ extension DataManager {
                 }
                 
                 if let foods = updates.foods, !foods.isEmpty {
-                    try self.createOrUpdateFoods(foods, in: bgContext)
+                    try self.createOrUpdateFoodsAndBarcodes(foods, in: bgContext)
                 }
                 
             } catch {
@@ -268,9 +268,9 @@ extension DataManager {
     }
 
     //MARK: - Foods
-    func createOrUpdateFoods(_ foods: [Food], in context: NSManagedObjectContext) throws {
+    func createOrUpdateFoodsAndBarcodes(_ foods: [Food], in context: NSManagedObjectContext) throws {
         try foods.forEach { food in
-            try createOrUpdateFood(food, in: context)
+            try createOrUpdateFoodAndBarcodes(food, in: context)
         }
 
         /// Send a notification on the main thread
@@ -283,7 +283,7 @@ extension DataManager {
         }
     }
     
-    func createOrUpdateFood(_ serverFood: Food, in context: NSManagedObjectContext) throws {
+    func createOrUpdateFoodAndBarcodes(_ serverFood: Food, in context: NSManagedObjectContext) throws {
         if let _ = try coreDataManager.foodEntity(with: serverFood.id, context: context) {
             print("📝 Updating existing Meal (Not implemented yet!)")
             /// [ ] We should be updating foods for when the metadata such as `lastUsedAt` and `numberOfTimesUsedGlobally` or `publishedStatus` changes
@@ -291,6 +291,13 @@ extension DataManager {
 //            try food.update(with: serverFood, in: context)
         } else {
             let foodEntity = FoodEntity(context: context, food: serverFood)
+            
+            for foodBarcode in serverFood.info.barcodes {
+                let barcodeEntity = BarcodeEntity(context: context, foodBarcode: foodBarcode, foodEntity: foodEntity)
+                print("✨ Inserting Barcode: \(foodBarcode.payload)")
+                context.insert(barcodeEntity)
+            }
+            
             print("✨ Inserting Food")
             context.insert(foodEntity)
         }

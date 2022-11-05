@@ -2,6 +2,16 @@ import Foundation
 import PrepDataTypes
 
 public extension DataManager {
+    func addNewImageFile(_ imageFile: ImageFile) throws {
+        let imageFileEntity = ImageFileEntity(context: coreDataManager.viewContext, imageFile: imageFile)
+        try coreDataManager.saveImageFileEntity(imageFileEntity)
+    }
+    
+    func addNewJSONFile(_ jsonFile: JSONFile) throws {
+        let jsonFileEntity = JSONFileEntity(context: coreDataManager.viewContext, jsonFile: jsonFile)
+        try coreDataManager.saveJSONFileEntity(jsonFileEntity)
+    }
+    
     func addNewFood(fromForm form: UserFoodCreateForm) throws {
         /// Construct the new `FoodEntity` and insert it
         let foodEntity = FoodEntity(context: coreDataManager.viewContext, form: form)
