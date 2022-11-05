@@ -54,6 +54,24 @@ extension CoreDataManager {
         }
     }
 
+    func markImagesAsSyncPending(ids: [UUID], context: NSManagedObjectContext) throws {
+        let request = NSFetchRequest<ImageFileEntity>(entityName: "ImageFileEntity")
+        request.predicate = NSPredicate(format: "id IN %@", ids)
+        let imageFileEntities = try context.fetch(request)
+        for imageFileEntity in imageFileEntities {
+            imageFileEntity.syncStatus = SyncStatus.syncPending.rawValue
+        }
+    }
+
+    func markJSONsAsSyncPending(ids: [UUID], context: NSManagedObjectContext) throws {
+        let request = NSFetchRequest<JSONFileEntity>(entityName: "JSONFileEntity")
+        request.predicate = NSPredicate(format: "id IN %@", ids)
+        let entities = try context.fetch(request)
+        for entity in entities {
+            entity.syncStatus = SyncStatus.syncPending.rawValue
+        }
+    }
+
     func markMealsAsSynced(mealIds: [UUID], context: NSManagedObjectContext) throws {
         let fetchRequest = NSFetchRequest<MealEntity>(entityName: "MealEntity")
         fetchRequest.predicate = NSPredicate(format: "id IN %@", mealIds)

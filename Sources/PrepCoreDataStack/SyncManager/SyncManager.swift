@@ -51,10 +51,14 @@ public class SyncManager {
     }
     
     func uploadPendingFiles() async throws {
-        let pendingFiles = try await dataManager.getFilesPendingSync()
+        let pendingFiles = try await dataManager.getFilesNotSynced()
         print("🐔 We're here with: \(pendingFiles.images.count) images and \(pendingFiles.jsons.count) json")
         
         //TODO: Add concurrency
+        
+        /// Mark the files we'll be uploading as `syncPending`
+        /// so that subsequent calls are prevented from uploading them
+        try await dataManager.markedNotSyncedFilesAsPending()
         
         for id in pendingFiles.jsons {
             

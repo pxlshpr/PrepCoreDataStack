@@ -4,7 +4,7 @@ import PrepDataTypes
 
 extension CoreDataManager {
 
-    func fileEntitiesPendingSync(completion: @escaping ((PendingFileEntities?) -> ())) throws {
+    func fileEntitiesNotSynced(completion: @escaping ((FileEntities?) -> ())) throws {
         Task {
             let bgContext =  newBackgroundContext()
             await bgContext.perform {
@@ -19,7 +19,7 @@ extension CoreDataManager {
                     let jsonFileEntities = try bgContext.fetch(jsonsRequest)
                     
                     completion(
-                        PendingFileEntities(
+                        FileEntities(
                             imageFileEntities: imageFileEntities,
                             jsonFileEntities: jsonFileEntities)
                     )
@@ -32,7 +32,7 @@ extension CoreDataManager {
     }
 }
 
-struct PendingFileEntities {
+struct FileEntities {
     let imageFileEntities: [ImageFileEntity]
     let jsonFileEntities: [JSONFileEntity]
 }
