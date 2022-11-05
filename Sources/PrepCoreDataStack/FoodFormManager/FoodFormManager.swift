@@ -13,16 +13,7 @@ public class FoodFormManager {
     
     public func save(_ formOutput: FoodFormOutput) throws {
         
-        /// Pass the food details to `DataManager` to be persisted in the backend (and synced to the server eventually)
-        try DataManager.shared.addNewFood(fromForm: formOutput.createForm)
-
-        for (uuid, _) in formOutput.images {
-            try saveImageFileEntity(for: uuid)
-        }
-        
-        try saveJSONFileEntity(for: formOutput.createForm.id)
-
-        /// Now save the files in the background
+        /// *First* save the files in the background (so that we actually have them ready when the `SyncManager` attempts to sync them
         Task {
             return try await withThrowingTaskGroup(of: Result<FoodSaveStep, FoodSaveError>.self) { group in
                 let foodId = formOutput.createForm.id
@@ -51,6 +42,18 @@ public class FoodFormManager {
                 }
 
                 print("✅ Save completed in \(CFAbsoluteTimeGetCurrent()-start)s")
+                
+                try await MainActor.run {
+                    
+                    /// Pass the food details to `DataManager` to be persisted in the backend (and synced to the server eventually)
+                    try DataManager.shared.addNewFood(fromForm: formOutput.createForm)
+
+                    for (uuid, _) in formOutput.images {
+                        try saveImageFileEntity(for: uuid)
+                    }
+                    
+                    try saveJSONFileEntity(for: formOutput.createForm.id)
+                }
             }
         }
     }
