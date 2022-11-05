@@ -37,6 +37,7 @@ public class SyncManager {
                 
                 try await sendAndReceiveSyncForms()
                 try await uploadPendingFiles()
+                try await dataManager.markFilesAsUploaded()
                 
             } catch NetworkManagerError.httpError(let statusCode) {
                 let status = statusCode != nil ? "\(statusCode!)" : "[no status code]"
@@ -75,6 +76,8 @@ public class SyncManager {
             let _ = try await networkManager.postFile(type: .image, data: data, id: id)
             print("image file \(id) was uploaded")
         }
+        
+        return
     }
     
     func sendAndReceiveSyncForms() async throws {

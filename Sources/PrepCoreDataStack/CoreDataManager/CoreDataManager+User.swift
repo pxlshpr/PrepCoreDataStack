@@ -11,7 +11,7 @@ extension CoreDataManager {
         self.viewContext.insert(userEntity)
         try self.viewContext.save()
     }
-    
+
     func markUserAsSynced(context: NSManagedObjectContext) throws {
         let fetchRequest = NSFetchRequest<UserEntity>(entityName: "UserEntity")
         let userEntity = try context.fetch(fetchRequest).first
@@ -33,6 +33,24 @@ extension CoreDataManager {
         let foodEntities = try context.fetch(fetchRequest)
         for foodEntity in foodEntities {
             foodEntity.syncStatus = SyncStatus.synced.rawValue
+        }
+    }
+
+    func markImagesAsSynced(ids: [UUID], context: NSManagedObjectContext) throws {
+        let request = NSFetchRequest<ImageFileEntity>(entityName: "ImageFileEntity")
+        request.predicate = NSPredicate(format: "id IN %@", ids)
+        let imageFileEntities = try context.fetch(request)
+        for imageFileEntity in imageFileEntities {
+            imageFileEntity.syncStatus = SyncStatus.synced.rawValue
+        }
+    }
+
+    func markJSONsAsSynced(ids: [UUID], context: NSManagedObjectContext) throws {
+        let request = NSFetchRequest<JSONFileEntity>(entityName: "JSONFileEntity")
+        request.predicate = NSPredicate(format: "id IN %@", ids)
+        let entities = try context.fetch(request)
+        for entity in entities {
+            entity.syncStatus = SyncStatus.synced.rawValue
         }
     }
 

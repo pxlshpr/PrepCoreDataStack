@@ -122,6 +122,26 @@ extension DataManager {
         }
     }
     
+    func markFilesAsUploaded() async throws {
+        let pendingFiles = try await getFilesPendingSync()
+        let bgContext = coreDataManager.newBackgroundContext()
+        await bgContext.perform {
+            do {
+                try self.coreDataManager.markImagesAsSynced(
+                    ids: pendingFiles.images,
+                    context: bgContext
+                )
+                try self.coreDataManager.markJSONsAsSynced(
+                    ids: pendingFiles.jsons,
+                    context: bgContext
+                )
+                try bgContext.save()
+            } catch {
+                print("Error marking updates as synced: \(error)")
+            }
+        }
+    }
+    
     func process(_ serverSyncForm: SyncForm, sentFor deviceSyncForm: SyncForm) async throws {
         guard let _ = user?.id else {
             throw SyncError.syncPerformedWithoutFetchedUser
