@@ -38,6 +38,9 @@ public extension DataManager {
                 Notification.Keys.food: food
             ]
         )
+        
+        /// Insert the new food at the start of the `myFoods` array
+        self.myFoods.insert(food, at: 0)
     }
 }
 

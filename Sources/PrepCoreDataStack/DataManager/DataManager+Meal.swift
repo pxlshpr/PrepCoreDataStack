@@ -24,6 +24,7 @@ public extension DataManager {
 
         /// Send a notification named`didAddMeal` with the new `Meal`
         let meal = Meal(from: mealEntity)
+        
         NotificationCenter.default.post(
             name: .didAddMeal,
             object: nil,
