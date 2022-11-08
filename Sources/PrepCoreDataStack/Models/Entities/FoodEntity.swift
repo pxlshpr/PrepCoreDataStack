@@ -41,7 +41,7 @@ public extension FoodEntity {
         self.publishStatus = form.publishStatus.rawValue
         
         /// Preset values for newly inserted User `Food`s
-        self.type = FoodType.rawFood.rawValue
+        self.type = FoodType.food.rawValue
         self.dataset = 0
         self.numberOfTimesConsumedGlobally = 0
         self.numberOfTimesConsumed = 0

@@ -5,7 +5,7 @@ let SyncInterval = 1.0
 
 public class SyncManager {
     
-    let networkManager = NetworkManager.server
+    let networkManager = NetworkManager.local
     let dataManager = DataManager.shared
 
     public static let shared = SyncManager()
