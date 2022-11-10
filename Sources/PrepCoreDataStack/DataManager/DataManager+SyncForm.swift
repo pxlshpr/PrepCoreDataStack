@@ -310,8 +310,16 @@ extension DataManager {
         try deviceUser.updateWithServerUser(serverUser)
         try context.save()
      
-        /// Now fire a notification to inform any interested parties (including ourself)
-        NotificationCenter.default.post(name: .didUpdateUser, object: nil)
+        /// Update the locally stored `User` before sending a notification out—make sure it's on the main thread
+        DispatchQueue.main.async {
+            do {
+                try self.fetchUser()
+            } catch {
+                print("Error fetching newly updated user: \(error)")
+            }
+            
+            NotificationCenter.default.post(name: .didUpdateUser, object: nil)
+        }        
     }
     
     func createOrUpdateDays(_ days: [Day], in context: NSManagedObjectContext) throws {
