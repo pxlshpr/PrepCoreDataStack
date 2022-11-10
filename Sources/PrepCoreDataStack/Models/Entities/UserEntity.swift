@@ -18,13 +18,26 @@ extension UserEntity {
 }
 
 extension UserEntity {
-    func update(with serverUser: User, in context: NSManagedObjectContext) throws {
-        id = serverUser.id
-        prefersMetricUnits = serverUser.prefersMetricUnits
-        preferredEnergyUnit = serverUser.preferredEnergyUnit.rawValue
-        explicitVolumeUnits = try! JSONEncoder().encode(serverUser.explicitVolumeUnits)
-        bodyMeasurements = try! JSONEncoder().encode(serverUser.bodyMeasurements)
+
+    private func update(with user: User) throws {
+        id = user.id
+        prefersMetricUnits = user.prefersMetricUnits
+        preferredEnergyUnit = user.preferredEnergyUnit.rawValue
+        explicitVolumeUnits = try JSONEncoder().encode(user.explicitVolumeUnits)
+        bodyMeasurements = try JSONEncoder().encode(user.bodyMeasurements)
+    }
+
+    /// When updating using a user received from the update, we set it as `synced` and use its `updatedAt` timestamp.
+    func updateWithServerUser(_ serverUser: User) throws {
+        try update(with: serverUser)
         updatedAt = serverUser.updatedAt
         syncStatus = SyncStatus.synced.rawValue
+    }
+    
+    /// When updating using a user updated on the device, we set the `updatedAt` timestamp ourselves and set it as `notSynced` so that the changes get synced.
+    func updateWithDeviceUser(_ deviceUser: User) throws {
+        try update(with: deviceUser)
+        updatedAt = Date().timeIntervalSince1970
+        syncStatus = SyncStatus.notSynced.rawValue
     }
 }

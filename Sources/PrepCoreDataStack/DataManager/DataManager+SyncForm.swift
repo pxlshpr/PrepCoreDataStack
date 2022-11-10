@@ -307,9 +307,9 @@ extension DataManager {
         guard let deviceUser = try coreDataManager.userEntity(context: context) else {
             throw CoreDataManagerError.couldNotFindCurrentUser
         }
-        try deviceUser.update(with: serverUser, in: context)
+        try deviceUser.updateWithServerUser(serverUser)
         try context.save()
-        
+     
         /// Now fire a notification to inform any interested parties (including ourself)
         NotificationCenter.default.post(name: .didUpdateUser, object: nil)
     }

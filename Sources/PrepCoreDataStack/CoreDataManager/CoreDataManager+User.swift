@@ -1,13 +1,15 @@
 import CoreData
 import PrepDataTypes
 
+//MARK: **** CLEAN THESE *****
+
 extension CoreDataManager {
     func userEntity(context: NSManagedObjectContext) throws -> UserEntity? {
         let fetchRequest = NSFetchRequest<UserEntity>(entityName: "UserEntity")
         return try context.fetch(fetchRequest).first
     }
     
-    func save(_ userEntity: UserEntity) throws {
+    func insertUserEntity(_ userEntity: UserEntity) throws {
         self.viewContext.insert(userEntity)
         try self.viewContext.save()
     }
