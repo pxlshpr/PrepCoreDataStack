@@ -1,7 +1,7 @@
 import Foundation
 import PrepDataTypes
 
-let SyncInterval = 1.0
+let SyncInterval = 20.0
 
 public class SyncManager {
     
