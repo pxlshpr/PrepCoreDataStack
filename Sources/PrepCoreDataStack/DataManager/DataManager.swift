@@ -26,25 +26,19 @@ public class DataManager: ObservableObject {
             print("CoreData error while fetching user: \(error)")
         }
         
-        //TODO: Add an observer for changes to MyFoods and update it accordingly
         loadMyFoods()
 
-        /// Add an observer for any changes to the User (from another device)
-//        NotificationCenter.default.addObserver(
-//            self, selector: #selector(serverDidUpdateUser),
-//            name: .didUpdateUser, object: nil
-//        )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(serverDidUpdateFoods),
+            name: .didUpdateFoods, object: nil
+        )
     }
     
-//    @objc func serverDidUpdateUser(notification: Notification) {
-//        DispatchQueue.main.async {
-//            do {
-//                try self.fetchUser()
-//            } catch {
-//                print("CoreData error while updating user: \(error)")
-//            }
-//        }
-//    }
+    @objc func serverDidUpdateFoods(notification: Notification) {
+        DispatchQueue.main.async {
+            self.loadMyFoods()
+        }
+    }
     
     func loadMyFoods() {
         Task {

@@ -53,7 +53,6 @@ public class SyncManager {
     
     func uploadPendingFiles() async throws {
         let pendingFiles = try await dataManager.getFilesWithSyncStatus(.notSynced)
-        print("🐔 We're here with: \(pendingFiles.imageFiles.count) images and \(pendingFiles.jsonFiles.count) json")
         
         //TODO: Add concurrency
         
