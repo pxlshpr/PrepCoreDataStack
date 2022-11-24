@@ -7,11 +7,7 @@ public extension Day {
         self.init(
             id: entity.id!,
             calendarDayString: entity.calendarDayString!,
-            goal: nil,
-            addEnergyExpendituresToGoal: entity.addEnergyExpendituresToGoal,
-            goalBonusEnergySplit: GoalBonusEnergySplit(rawValue: entity.goalBonusEnergySplit),
-            goalBonusEnergySplitRatio: GoalBonusEnergySplitRatio(rawValue: entity.goalBonusEnergySplitRatio),
-            energyExpenditures: [],
+            goalSet: nil,
             meals: entity.dayMeals,
             syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt

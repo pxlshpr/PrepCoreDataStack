@@ -4,13 +4,17 @@ import PrepDataTypes
 //MARK: UserEntity → User
 public extension User {
     init(from entity: UserEntity) {
+        let bodyProfile: BodyProfile?
+        if let bodyProfileData = entity.bodyProfile {
+            bodyProfile = try! JSONDecoder().decode(BodyProfile.self, from: bodyProfileData)
+        } else {
+            bodyProfile = nil
+        }
         self.init(
             id: entity.id!,
             cloudKitId: entity.cloudKitId,
-            preferredEnergyUnit: EnergyUnit(rawValue: entity.preferredEnergyUnit)!,
-            prefersMetricUnits: entity.prefersMetricUnits,
-            explicitVolumeUnits: try! JSONDecoder().decode(UserExplicitVolumeUnits.self, from: entity.explicitVolumeUnits!),
-            bodyMeasurements: try! JSONDecoder().decode(BodyMeasurements.self, from: entity.bodyMeasurements!),
+            units: try! JSONDecoder().decode(UserUnits.self, from: entity.units!),
+            bodyProfile: bodyProfile,
             syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt
         )

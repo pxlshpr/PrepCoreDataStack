@@ -3,7 +3,7 @@ import PrepDataTypes
 
 extension DataManager {
     public var userVolumeUnits: UserExplicitVolumeUnits {
-        user?.explicitVolumeUnits ?? .defaultUnits
+        user?.units.volume ?? .defaultUnits
     }
     
     func fetchUser() throws {
@@ -27,7 +27,7 @@ extension DataManager {
     }
     
     public func setUserVolumeUnit(_ volumeExplicitUnit: VolumeExplicitUnit) throws {
-        user?.explicitVolumeUnits.set(volumeExplicitUnit)
+        user?.units.volume.set(volumeExplicitUnit)
         try saveUpdatedUser()
     }
     

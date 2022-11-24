@@ -8,10 +8,8 @@ extension UserEntity {
         self.init(context: context)
         self.id = user.id
         self.cloudKitId = user.cloudKitId
-        self.preferredEnergyUnit = user.preferredEnergyUnit.rawValue
-        self.prefersMetricUnits = user.prefersMetricUnits
-        self.explicitVolumeUnits = try! JSONEncoder().encode(user.explicitVolumeUnits)
-        self.bodyMeasurements = try! JSONEncoder().encode(user.bodyMeasurements)
+        self.units = try! JSONEncoder().encode(user.units)
+        self.bodyProfile = try! JSONEncoder().encode(user.bodyProfile)
         self.updatedAt = user.updatedAt
         self.syncStatus = user.syncStatus.rawValue
     }
@@ -21,10 +19,8 @@ extension UserEntity {
 
     private func update(with user: User) throws {
         id = user.id
-        prefersMetricUnits = user.prefersMetricUnits
-        preferredEnergyUnit = user.preferredEnergyUnit.rawValue
-        explicitVolumeUnits = try JSONEncoder().encode(user.explicitVolumeUnits)
-        bodyMeasurements = try JSONEncoder().encode(user.bodyMeasurements)
+        units = try JSONEncoder().encode(user.units)
+        bodyProfile = try JSONEncoder().encode(user.bodyProfile)
     }
 
     /// When updating using a user received from the update, we set it as `synced` and use its `updatedAt` timestamp.
