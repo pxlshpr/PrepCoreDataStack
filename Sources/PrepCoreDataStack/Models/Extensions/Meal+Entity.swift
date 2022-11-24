@@ -11,6 +11,7 @@ public extension Meal {
             name: entity.name!,
             time: entity.time,
             markedAsEatenAt: entity.markedAsEatenAt,
+            goalWorkoutMinutes: Int(entity.goalWorkoutMinutes),
             foodItems: [],
             syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt,

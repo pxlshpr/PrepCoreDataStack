@@ -6,7 +6,7 @@ public extension User {
     init(from entity: UserEntity) {
         let bodyProfile: BodyProfile?
         if let bodyProfileData = entity.bodyProfile {
-            bodyProfile = try! JSONDecoder().decode(BodyProfile.self, from: bodyProfileData)
+            bodyProfile = try? JSONDecoder().decode(BodyProfile.self, from: bodyProfileData)
         } else {
             bodyProfile = nil
         }
@@ -15,6 +15,7 @@ public extension User {
             cloudKitId: entity.cloudKitId,
             units: try! JSONDecoder().decode(UserUnits.self, from: entity.units!),
             bodyProfile: bodyProfile,
+            bodyProfileUpdatedAt: entity.bodyProfileUpdatedAt,
             syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt
         )
