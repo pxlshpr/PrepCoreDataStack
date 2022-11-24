@@ -10,6 +10,7 @@ extension UserEntity {
         self.cloudKitId = user.cloudKitId
         self.units = try! JSONEncoder().encode(user.units)
         self.bodyProfile = try! JSONEncoder().encode(user.bodyProfile)
+        self.bodyProfileUpdatedAt = user.bodyProfileUpdatedAt ?? 0
         self.updatedAt = user.updatedAt
         self.syncStatus = user.syncStatus.rawValue
     }
