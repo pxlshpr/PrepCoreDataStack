@@ -31,6 +31,11 @@ extension DataManager {
         try saveUpdatedUser()
     }
     
+    func setUserTDEEProfile(_ bodyProfile: BodyProfile) throws {
+        user?.bodyProfile = bodyProfile
+        try saveUpdatedUser()
+    }
+    
     func saveUpdatedUser() throws {
         /// Set the flags to include it in the next sync
         self.user?.updatedAt = Date().timeIntervalSince1970
