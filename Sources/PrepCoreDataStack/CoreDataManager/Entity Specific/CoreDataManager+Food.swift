@@ -22,7 +22,6 @@ extension CoreDataManager {
     }    
 }
 
-
 extension CoreDataManager {
     func fetchMyFoodEntities(context: NSManagedObjectContext) throws -> [FoodEntity] {
         let request: NSFetchRequest<FoodEntity> = FoodEntity.fetchRequest()

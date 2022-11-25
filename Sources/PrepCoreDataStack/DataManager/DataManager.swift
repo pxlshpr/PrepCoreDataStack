@@ -10,6 +10,8 @@ public class DataManager: ObservableObject {
 
     public var daysToSync: Range<Date>? = nil
 
+    @Published var goalSets: [GoalSet] = []
+
     //TODO: We need to mitigate situations where this might be extremely large
     @Published var myFoods: [Food] = []
 
@@ -27,25 +29,13 @@ public class DataManager: ObservableObject {
         }
         
         loadMyFoods()
+        loadGoalSets()
 
         NotificationCenter.default.addObserver(
             self, selector: #selector(serverDidUpdateFoods),
             name: .didUpdateFoods, object: nil
         )
-    }
-    
-    @objc func serverDidUpdateFoods(notification: Notification) {
-        DispatchQueue.main.async {
-            self.loadMyFoods()
-        }
-    }
-    
-    func loadMyFoods() {
-        Task {
-            let foods = try await getMyFoods()
-            await MainActor.run {
-                self.myFoods = foods
-            }
-        }
+        
+        //TODO: Add notification for GoalSets
     }
 }

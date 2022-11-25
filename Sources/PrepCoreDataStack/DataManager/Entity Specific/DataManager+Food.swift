@@ -45,6 +45,21 @@ public extension DataManager {
 }
 
 public extension DataManager {
+    func loadMyFoods() {
+        Task {
+            let foods = try await getMyFoods()
+            await MainActor.run {
+                self.myFoods = foods
+            }
+        }
+    }
+    
+    @objc func serverDidUpdateFoods(notification: Notification) {
+        DispatchQueue.main.async {
+            self.loadMyFoods()
+        }
+    }
+
     func getMyFoods() async throws -> [Food] {
         try await withCheckedThrowingContinuation { continuation in
             do {
