@@ -8,7 +8,7 @@ public extension DataManager {
         /// Construct the new `GoalSetEntity` and insert it
         let entity = GoalSetEntity(context: coreDataManager.viewContext, goalSet: goalSet)
         coreDataManager.insertGoalSetEntity(entity)
-        
+
         try coreDataManager.save()
         
         //TODO: Revisit this sending a notification shebang

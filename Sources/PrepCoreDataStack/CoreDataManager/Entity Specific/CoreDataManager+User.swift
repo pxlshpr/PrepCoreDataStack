@@ -103,6 +103,14 @@ extension CoreDataManager {
 }
 
 extension CoreDataManager {
+    func goalSetEntity(with id: String, context: NSManagedObjectContext) throws -> GoalSetEntity? {
+        let request = NSFetchRequest<GoalSetEntity>(entityName: "GoalSetEntity")
+        request.predicate = NSPredicate(format: "id == %@", id)
+        return try context.fetch(request).first
+    }
+}
+
+extension CoreDataManager {
     func dayEntity(with id: String, context: NSManagedObjectContext) throws -> DayEntity? {
         let request = NSFetchRequest<DayEntity>(entityName: "DayEntity")
         request.predicate = NSPredicate(format: "id == %@", id)

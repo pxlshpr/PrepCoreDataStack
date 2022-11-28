@@ -7,7 +7,7 @@ public extension DataManager {
         
         ///     update `User` with it
         try setUserTDEEProfile(bodyProfile)
-        
+
         ///     update current `Day` with it if it exists
     }
 }

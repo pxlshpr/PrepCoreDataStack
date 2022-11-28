@@ -31,6 +31,7 @@ public extension DataManager {
         
         /// Send a notification named`didAddFood` with the new `Food`
         let food = Food(from: foodEntity)
+        writeEncodableToJSON(food, type: "food")
         NotificationCenter.default.post(
             name: .didAddFood,
             object: nil,
@@ -70,6 +71,28 @@ public extension DataManager {
             } catch {
                 continuation.resume(throwing: error)
             }
+        }
+    }
+}
+
+
+public func writeEncodableToJSON(_ encodable: Encodable, type: String) {
+    guard let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        return
+    }
+    Task {
+        do {
+            let directoryUrl = documentsUrl.appending(component: UUID().uuidString)
+            try FileManager.default.createDirectory(at: directoryUrl, withIntermediateDirectories: false)
+            
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(encodable)
+
+            let url = directoryUrl.appending(component: "\(UUID().uuidString).json")
+            try data.write(to: url)
+            print("📝 Wrote \(type) to: \(directoryUrl)")
+        } catch {
+            print("Error writing: \(error)")
         }
     }
 }

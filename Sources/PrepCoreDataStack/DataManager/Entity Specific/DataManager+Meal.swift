@@ -7,6 +7,13 @@ enum DataManagerError: Error {
 }
 
 public extension DataManager {
+    func setGoalSet(_ goalSet: GoalSet, on date: Date) throws {
+        guard let user else { throw DataManagerError.noUserFound }
+        try coreDataManager.setGoalSet(goalSet, on: date, for: user.id)
+    }
+}
+
+public extension DataManager {
 
     func addNewMeal(named name: String, at time: Date, on date: Date) throws {
         guard let user else {

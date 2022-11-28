@@ -33,4 +33,5 @@ enum CoreDataManagerError: Error {
     case fetchUserFoodForJson(Error)
     
     case couldNotFindCurrentUser
+    case missingGoalSetEntity
 }

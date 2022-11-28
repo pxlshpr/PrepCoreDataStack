@@ -1,5 +1,24 @@
 import Foundation
+import PrepDataTypes
 
+extension CoreDataManager {
+    func setGoalSet(_ goalSet: GoalSet, on date: Date, for userId: UUID) throws {
+        let dayEntity = try fetchOrCreateDayEntity(on: date, for: userId)
+        
+        /// Fetch `GoalSetEntity` with `id`
+        guard let goalSetEntity = try goalSetEntity(with: goalSet.id.uuidString, context: viewContext) else {
+            throw CoreDataManagerError.missingGoalSetEntity
+        }
+        
+        /// Assign `GoalSet` to `Day` as `diet`
+        dayEntity.diet = goalSetEntity
+        
+        /// Reset the `syncStatus` and `updatedAt` fields so that the `SyncManager` syncs it in the next poll
+        dayEntity.syncStatus = SyncStatus.notSynced.rawValue
+        dayEntity.updatedAt = Date().timeIntervalSince1970
+        try self.viewContext.save()
+    }
+}
 extension CoreDataManager {
  
     /// Returns a newly created `MealEntity` after creating and linking a newly created `DayEntity` if needed

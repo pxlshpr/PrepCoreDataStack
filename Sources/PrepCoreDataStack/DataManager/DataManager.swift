@@ -10,7 +10,7 @@ public class DataManager: ObservableObject {
 
     public var daysToSync: Range<Date>? = nil
 
-    @Published var goalSets: [GoalSet] = []
+    @Published public var goalSets: [GoalSet] = []
 
     //TODO: We need to mitigate situations where this might be extremely large
     @Published var myFoods: [Food] = []
