@@ -7,7 +7,7 @@ extension DayMeal {
             name: entity.name!,
             time: entity.time,
             markedAsEatenAt: entity.markedAsEatenAt,
-            foodItems: []
+            foodItems: entity.mealFoodItems
         )
     }
 }
