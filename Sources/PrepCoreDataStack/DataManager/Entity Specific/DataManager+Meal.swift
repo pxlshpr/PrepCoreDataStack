@@ -119,13 +119,15 @@ public extension DataManager {
         
         let foodItem = FoodItem(from: foodItemEntity)
 
-        NotificationCenter.default.post(
-            name: .didAddFoodItemToMeal,
-            object: nil,
-            userInfo: [
-                Notification.Keys.foodItem: foodItem
-            ]
-        )
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(
+                name: .didAddFoodItemToMeal,
+                object: nil,
+                userInfo: [
+                    Notification.Keys.foodItem: foodItem
+                ]
+            )
+        }
         
         return foodItem
     }
