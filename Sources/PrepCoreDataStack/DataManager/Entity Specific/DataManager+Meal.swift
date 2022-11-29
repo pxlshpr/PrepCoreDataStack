@@ -11,6 +11,10 @@ public extension DataManager {
         guard let user else { throw DataManagerError.noUserFound }
         try coreDataManager.setGoalSet(goalSet, on: date, for: user.id)
     }
+    
+    func removeGoalSet(on date: Date) throws {
+        try coreDataManager.removeGoalSet(on: date)
+    }
 }
 
 public extension DataManager {

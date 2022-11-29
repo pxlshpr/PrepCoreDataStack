@@ -34,4 +34,5 @@ enum CoreDataManagerError: Error {
     
     case couldNotFindCurrentUser
     case missingGoalSetEntity
+    case missingDay
 }

@@ -18,6 +18,19 @@ extension CoreDataManager {
         dayEntity.updatedAt = Date().timeIntervalSince1970
         try self.viewContext.save()
     }
+    
+    func removeGoalSet(on date: Date) throws {
+        guard let dayEntity = try fetchDayEntity(for: date, context: viewContext) else {
+            throw CoreDataManagerError.missingDay
+        }
+        
+        dayEntity.diet = nil
+
+        /// Reset the `syncStatus` and `updatedAt` fields so that the `SyncManager` syncs it in the next poll
+        dayEntity.syncStatus = SyncStatus.notSynced.rawValue
+        dayEntity.updatedAt = Date().timeIntervalSince1970
+        try self.viewContext.save()
+    }
 }
 extension CoreDataManager {
  
