@@ -46,3 +46,30 @@ extension MealEntity {
         syncStatus = SyncStatus.synced.rawValue
     }
 }
+
+extension MealEntity {
+    var foodItemEntities: [FoodItemEntity] {
+        foodItems?.allObjects as? [FoodItemEntity] ?? []
+    }
+    
+    var mealFoodItems: [MealFoodItem] {
+        foodItemEntities
+            .map { MealFoodItem(from: $0) }
+            .sorted { (lhs, rhs) in
+                return lhs.sortPosition < rhs.sortPosition
+            }
+    }
+}
+
+//MARK: Move this elsewhere
+extension MealFoodItem {
+    public init(from entity: FoodItemEntity) {
+        self.init(
+            id: entity.id!,
+            food: Food(from: entity.food!),
+            amount: try! JSONDecoder().decode(FoodValue.self, from: entity.amount!),
+            markedAsEatenAt: entity.markedAsEatenAt,
+            sortPosition: Int(entity.sortPosition)
+        )
+    }
+}

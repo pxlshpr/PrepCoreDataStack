@@ -7,19 +7,30 @@ enum DataManagerError: Error {
 }
 
 public extension DataManager {
-    func setGoalSet(_ goalSet: GoalSet, on date: Date) throws {
-        guard let user else { throw DataManagerError.noUserFound }
-        try coreDataManager.setGoalSet(goalSet, on: date, for: user.id)
+
+    func existingMeal(matching dayMeal: DayMeal) throws -> Meal? {
+        guard let mealEntity = try coreDataManager.mealEntity(
+            with: dayMeal.id,
+            context: coreDataManager.viewContext
+        ) else { return nil }
+        
+        return Meal(from: mealEntity)
     }
     
-    func removeGoalSet(on date: Date) throws {
-        try coreDataManager.removeGoalSet(on: date)
+    func fetchMealOrCreate(for dayMeal: DayMeal, on date: Date) throws -> Meal {
+        guard let existingMeal = try existingMeal(matching: dayMeal) else {
+            print("🍽 Creating meal")
+            return try addNewMeal(
+                named: dayMeal.name,
+                at: Date(timeIntervalSince1970: dayMeal.time),
+                on: date
+            )
+        }
+        print("🍽 Returning existing meal")
+        return existingMeal
     }
-}
-
-public extension DataManager {
-
-    func addNewMeal(named name: String, at time: Date, on date: Date) throws {
+    
+    func addNewMeal(named name: String, at time: Date, on date: Date) throws -> Meal {
         guard let user else {
             throw DataManagerError.noUserFound
         }
@@ -43,6 +54,8 @@ public extension DataManager {
                 Notification.Keys.meal: meal
             ]
         )
+        
+        return meal
     }
     
     func getMealsForDate(_ date: Date) async throws -> [Meal] {
@@ -86,5 +99,42 @@ public extension DataManager {
                 continuation.resume(throwing: error)
             }
         }
+    }
+}
+
+//TODO: Move this to DataManager+FoodItem
+public extension DataManager {
+    
+    func addNewMealItem(_ mealFoodItem: MealFoodItem, to meal: Meal) throws -> FoodItem {
+        guard let user else { throw DataManagerError.noUserFound }
+        
+        var mealFoodItem = mealFoodItem
+        mealFoodItem.sortPosition = meal.nextSortPosition
+        
+        let foodItemEntity = try coreDataManager.createAndSaveMealItem(
+            mealFoodItem,
+            to: meal,
+            for: user.id
+        )
+        
+        let foodItem = FoodItem(from: foodItemEntity)
+
+//        NotificationCenter.default.post(
+//            name: .didAddMeal,
+//            object: nil,
+//            userInfo: [
+//                Notification.Keys.meal: meal
+//            ]
+//        )
+        
+        return foodItem
+    }
+}
+
+extension Meal {
+    var nextSortPosition: Int {
+        let sorted = foodItems.sorted(by: { $0.sortPosition > $1.sortPosition })
+        guard let first = sorted.first else { return 1 }
+        return first.sortPosition + 1
     }
 }

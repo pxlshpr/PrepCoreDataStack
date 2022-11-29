@@ -22,7 +22,7 @@ public extension Meal {
             markedAsEatenAt: entity.markedAsEatenAt,
             goalSet: goalSet,
             goalWorkoutMinutes: Int(entity.goalWorkoutMinutes),
-            foodItems: [],
+            foodItems: entity.mealFoodItems,
             syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt,
             deletedAt: entity.deletedAt

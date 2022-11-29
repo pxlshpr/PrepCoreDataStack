@@ -50,3 +50,14 @@ public extension DataManager {
         }
     }
 }
+
+public extension DataManager {
+    func setGoalSet(_ goalSet: GoalSet, on date: Date) throws {
+        guard let user else { throw DataManagerError.noUserFound }
+        try coreDataManager.setGoalSet(goalSet, on: date, for: user.id)
+    }
+    
+    func removeGoalSet(on date: Date) throws {
+        try coreDataManager.removeGoalSet(on: date)
+    }
+}

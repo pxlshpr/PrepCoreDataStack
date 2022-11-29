@@ -2,37 +2,6 @@ import Foundation
 import PrepDataTypes
 
 extension CoreDataManager {
-    func setGoalSet(_ goalSet: GoalSet, on date: Date, for userId: UUID) throws {
-        let dayEntity = try fetchOrCreateDayEntity(on: date, for: userId)
-        
-        /// Fetch `GoalSetEntity` with `id`
-        guard let goalSetEntity = try goalSetEntity(with: goalSet.id.uuidString, context: viewContext) else {
-            throw CoreDataManagerError.missingGoalSetEntity
-        }
-        
-        /// Assign `GoalSet` to `Day` as `diet`
-        dayEntity.diet = goalSetEntity
-        
-        /// Reset the `syncStatus` and `updatedAt` fields so that the `SyncManager` syncs it in the next poll
-        dayEntity.syncStatus = SyncStatus.notSynced.rawValue
-        dayEntity.updatedAt = Date().timeIntervalSince1970
-        try self.viewContext.save()
-    }
-    
-    func removeGoalSet(on date: Date) throws {
-        guard let dayEntity = try fetchDayEntity(for: date, context: viewContext) else {
-            throw CoreDataManagerError.missingDay
-        }
-        
-        dayEntity.diet = nil
-
-        /// Reset the `syncStatus` and `updatedAt` fields so that the `SyncManager` syncs it in the next poll
-        dayEntity.syncStatus = SyncStatus.notSynced.rawValue
-        dayEntity.updatedAt = Date().timeIntervalSince1970
-        try self.viewContext.save()
-    }
-}
-extension CoreDataManager {
  
     /// Returns a newly created `MealEntity` after creating and linking a newly created `DayEntity` if needed
     func createAndSaveMealEntity(named name: String, at time: Date, on date: Date, for userId: UUID) throws -> MealEntity {
@@ -66,6 +35,34 @@ extension CoreDataManager {
                 }
             }
         }
+    }    
+}
+
+//TODO: Move this to CoreDataManager+FoodItem
+
+extension CoreDataManager {
+
+    /// Returns a newly created `FoodItemEntity` after creating and linking an existing `Meal`
+    func createAndSaveMealItem(_ mealFoodItem: MealFoodItem, to meal: Meal, for userId: UUID) throws -> FoodItemEntity {
+        
+        guard let foodEntity = try foodEntity(with: mealFoodItem.food.id, context: viewContext) else {
+            throw CoreDataManagerError.missingDay
+        }
+        
+        guard let mealEntity = try mealEntity(with: meal.id, context: viewContext) else {
+            throw CoreDataManagerError.missingDay
+        }
+        
+        //TODO: Submit sortPosition here after incrementing it
+        let foodItemEntity = FoodItemEntity(
+            context: viewContext,
+            mealFoodItem: mealFoodItem,
+            foodEntity: foodEntity,
+            mealEntity: mealEntity
+        )
+        
+        self.viewContext.insert(foodItemEntity)
+        try self.viewContext.save()
+        return foodItemEntity
     }
-    
 }
