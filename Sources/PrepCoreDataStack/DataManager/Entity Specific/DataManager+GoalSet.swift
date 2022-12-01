@@ -61,3 +61,17 @@ public extension DataManager {
         try coreDataManager.removeGoalSet(on: date)
     }
 }
+
+public extension DataManager {
+    var diets: [GoalSet] {
+        goalSets.filter { $0.type == .day }
+    }
+    
+    var mealTypes: [GoalSet] {
+        goalSets.filter { $0.type == .meal }
+    }
+    
+    func goalSets(for type: GoalSetType) -> [GoalSet] {
+        goalSets.filter { $0.type == type }
+    }
+}

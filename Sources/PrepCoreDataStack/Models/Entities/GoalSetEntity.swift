@@ -9,7 +9,7 @@ extension GoalSetEntity {
         self.id = goalSet.id
         self.name = goalSet.name
         self.emoji = goalSet.emoji
-        self.isForMeal = goalSet.isForMeal
+        self.type = Int16(goalSet.type.rawValue)
         self.goals = try! JSONEncoder().encode(goalSet.goals)
         self.syncStatus = Int16(goalSet.syncStatus.rawValue)
         self.updatedAt = goalSet.updatedAt

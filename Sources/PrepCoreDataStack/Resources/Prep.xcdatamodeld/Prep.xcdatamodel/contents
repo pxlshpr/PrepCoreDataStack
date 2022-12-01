@@ -16,7 +16,7 @@
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="diet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GoalSetEntity" inverseName="days" inverseEntity="GoalSetEntity"/>
+        <relationship name="goalSet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GoalSetEntity" inverseName="days" inverseEntity="GoalSetEntity"/>
         <relationship name="meals" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MealEntity" inverseName="day" inverseEntity="MealEntity"/>
     </entity>
     <entity name="FoodEntity" representedClassName="PrepCoreDataStack.FoodEntity" syncable="YES" codeGenerationType="class">
@@ -58,12 +58,12 @@
         <attribute name="emoji" attributeType="String"/>
         <attribute name="goals" attributeType="Binary"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="isForMeal" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="type" attributeType="Integer 16" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="days" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DayEntity" inverseName="diet" inverseEntity="DayEntity"/>
-        <relationship name="meals" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MealEntity" inverseName="mealType" inverseEntity="MealEntity"/>
+        <relationship name="days" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DayEntity" inverseName="goalSet" inverseEntity="DayEntity"/>
+        <relationship name="meals" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MealEntity" inverseName="goalSet" inverseEntity="MealEntity"/>
     </entity>
     <entity name="ImageFileEntity" representedClassName="ImageFileEntity" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
@@ -84,7 +84,7 @@
         <attribute name="updatedAt" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="day" maxCount="1" deletionRule="Nullify" destinationEntity="DayEntity" inverseName="meals" inverseEntity="DayEntity"/>
         <relationship name="foodItems" toMany="YES" deletionRule="Nullify" destinationEntity="FoodItemEntity" inverseName="meal" inverseEntity="FoodItemEntity"/>
-        <relationship name="mealType" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GoalSetEntity" inverseName="meals" inverseEntity="GoalSetEntity"/>
+        <relationship name="goalSet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GoalSetEntity" inverseName="meals" inverseEntity="GoalSetEntity"/>
     </entity>
     <entity name="UserEntity" representedClassName="UserEntity" syncable="YES" codeGenerationType="class">
         <attribute name="bodyProfile" optional="YES" attributeType="Binary"/>

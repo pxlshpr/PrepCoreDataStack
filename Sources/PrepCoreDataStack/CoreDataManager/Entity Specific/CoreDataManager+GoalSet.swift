@@ -40,8 +40,8 @@ extension CoreDataManager {
             throw CoreDataManagerError.missingGoalSetEntity
         }
         
-        /// Assign `GoalSet` to `Day` as `diet`
-        dayEntity.diet = goalSetEntity
+        /// Assign `GoalSet` to `Day`
+        dayEntity.goalSet = goalSetEntity
         
         /// Reset the `syncStatus` and `updatedAt` fields so that the `SyncManager` syncs it in the next poll
         dayEntity.syncStatus = SyncStatus.notSynced.rawValue
@@ -54,7 +54,7 @@ extension CoreDataManager {
             throw CoreDataManagerError.missingDay
         }
         
-        dayEntity.diet = nil
+        dayEntity.goalSet = nil
 
         /// Reset the `syncStatus` and `updatedAt` fields so that the `SyncManager` syncs it in the next poll
         dayEntity.syncStatus = SyncStatus.notSynced.rawValue

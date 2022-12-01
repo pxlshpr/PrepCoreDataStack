@@ -5,7 +5,7 @@ import PrepDataTypes
 public extension Day {
     init(from entity: DayEntity) {
         let goalSet: GoalSet?
-        if let diet = entity.diet {
+        if let diet = entity.goalSet {
             goalSet = GoalSet(from: diet)
         } else {
             goalSet = nil

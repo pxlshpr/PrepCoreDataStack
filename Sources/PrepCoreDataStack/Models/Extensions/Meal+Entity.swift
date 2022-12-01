@@ -8,7 +8,7 @@ public extension Meal {
         let day = Day(from: entity.day!)
         
         let goalSet: GoalSet?
-        if let mealType = entity.mealType {
+        if let mealType = entity.goalSet {
             goalSet = GoalSet(from: mealType)
         } else {
             goalSet = nil
