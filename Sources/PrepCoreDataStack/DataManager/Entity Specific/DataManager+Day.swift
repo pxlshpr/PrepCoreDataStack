@@ -1,7 +1,7 @@
 import Foundation
 import PrepDataTypes
 
-extension DataManager {
+public extension DataManager {
     
     func getDay(for date: Date) async throws -> Day? {
         try await withCheckedThrowingContinuation { continuation in

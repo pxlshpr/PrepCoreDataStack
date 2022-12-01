@@ -71,16 +71,16 @@ public extension DataManager {
     }
     
     func deleteMeal(_ meal: DayMeal) throws {
-//        try coreDataManager.deleteMealItem(mealFoodItem)
-//        
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-//            NotificationCenter.default.post(
-//                name: .didDeleteFoodItemFromMeal,
-//                object: nil,
-//                userInfo: [
-//                    Notification.Keys.uuid: mealFoodItem.id
-//                ]
-//            )
-//        }
+        try coreDataManager.deleteMeal(meal)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(
+                name: .didDeleteMeal,
+                object: nil,
+                userInfo: [
+                    Notification.Keys.uuid: meal.id
+                ]
+            )
+        }
     }
 }

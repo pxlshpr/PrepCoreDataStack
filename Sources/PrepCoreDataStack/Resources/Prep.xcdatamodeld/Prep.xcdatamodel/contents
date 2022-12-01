@@ -83,7 +83,7 @@
         <attribute name="time" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="day" maxCount="1" deletionRule="Nullify" destinationEntity="DayEntity" inverseName="meals" inverseEntity="DayEntity"/>
-        <relationship name="foodItems" toMany="YES" deletionRule="Nullify" destinationEntity="FoodItemEntity" inverseName="meal" inverseEntity="FoodItemEntity"/>
+        <relationship name="foodItems" toMany="YES" deletionRule="Cascade" destinationEntity="FoodItemEntity" inverseName="meal" inverseEntity="FoodItemEntity"/>
         <relationship name="goalSet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GoalSetEntity" inverseName="meals" inverseEntity="GoalSetEntity"/>
     </entity>
     <entity name="UserEntity" representedClassName="UserEntity" syncable="YES" codeGenerationType="class">
