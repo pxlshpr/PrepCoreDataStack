@@ -3,6 +3,17 @@ import PrepDataTypes
 
 public extension DataManager {
     
+    func addGoalSetAndBodyProfile(_ goalSet: GoalSet, bodyProfile: BodyProfile?) {
+        do {
+            if let bodyProfile {
+                try DataManager.shared.setBodyProfile(bodyProfile)
+            }
+            try DataManager.shared.addNewGoalSet(goalSet)
+        } catch {
+            print("Error adding or setting goal set")
+        }
+    }
+    
     func addNewGoalSet(_ goalSet: GoalSet) throws {
         
         /// Construct the new `GoalSetEntity` and insert it
@@ -52,9 +63,11 @@ public extension DataManager {
 }
 
 public extension DataManager {
-    func setGoalSet(_ goalSet: GoalSet, on date: Date) throws {
+    /// Sets `GoalSet` on provided date and returns `Day` in case we created one
+    func setGoalSet(_ goalSet: GoalSet, on date: Date) throws -> Day {
         guard let user else { throw DataManagerError.noUserFound }
-        try coreDataManager.setGoalSet(goalSet, on: date, for: user.id)
+        let dayEntity = try coreDataManager.setGoalSet(goalSet, on: date, for: user.id)
+        return Day(from: dayEntity)
     }
     
     func removeGoalSet(on date: Date) throws {

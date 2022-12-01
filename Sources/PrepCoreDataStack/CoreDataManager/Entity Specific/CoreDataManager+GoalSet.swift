@@ -32,7 +32,7 @@ extension CoreDataManager {
 }
 
 extension CoreDataManager {
-    func setGoalSet(_ goalSet: GoalSet, on date: Date, for userId: UUID) throws {
+    func setGoalSet(_ goalSet: GoalSet, on date: Date, for userId: UUID) throws -> DayEntity {
         let dayEntity = try fetchOrCreateDayEntity(on: date, for: userId)
         
         /// Fetch `GoalSetEntity` with `id`
@@ -47,6 +47,8 @@ extension CoreDataManager {
         dayEntity.syncStatus = SyncStatus.notSynced.rawValue
         dayEntity.updatedAt = Date().timeIntervalSince1970
         try self.viewContext.save()
+        
+        return dayEntity
     }
     
     func removeGoalSet(on date: Date) throws {
