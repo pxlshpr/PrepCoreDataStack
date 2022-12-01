@@ -1,11 +1,7 @@
 import Foundation
 import PrepDataTypes
 
-enum DataManagerError: Error {
-    case noUserFound
-    case noDayFoundWhenInsertingMealFromServer
-}
-
+//MARK: - Fetch
 public extension DataManager {
 
     func existingMeal(matching dayMeal: DayMeal) throws -> Meal? {
@@ -30,6 +26,22 @@ public extension DataManager {
         return existingMeal
     }
     
+    func getMealsForDate(_ date: Date) async throws -> [Meal] {
+        try await withCheckedThrowingContinuation { continuation in
+            do {
+                try coreDataManager.mealEntities(for: date) { mealEntities in
+                    let meals = mealEntities.map { Meal(from: $0) }
+                    continuation.resume(returning: meals)
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+}
+
+//MARK: Create / Update / Delete
+public extension DataManager {
     func addNewMeal(named name: String, at time: Date, on date: Date) throws -> Meal {
         guard let user else {
             throw DataManagerError.noUserFound
@@ -58,117 +70,17 @@ public extension DataManager {
         return meal
     }
     
-    func getMealsForDate(_ date: Date) async throws -> [Meal] {
-        try await withCheckedThrowingContinuation { continuation in
-            do {
-                try coreDataManager.mealEntities(for: date) { mealEntities in
-                    let meals = mealEntities.map { Meal(from: $0) }
-                    continuation.resume(returning: meals)
-                }
-            } catch {
-                continuation.resume(throwing: error)
-            }
-        }
-    }
-    
-    func getDay(for date: Date) async throws -> Day? {
-        try await withCheckedThrowingContinuation { continuation in
-            do {
-                try coreDataManager.dayEntity(for: date) { dayEntity in
-                    guard let dayEntity else {
-                        continuation.resume(returning: nil)
-                        return
-                    }
-                    let day = Day(from: dayEntity)
-                    continuation.resume(returning: day)
-                }
-            } catch {
-                continuation.resume(throwing: error)
-            }
-        }
-    }
-
-    func days(for range: Range<Date>) async throws -> [Day] {
-        try await withCheckedThrowingContinuation { continuation in
-            do {
-                try coreDataManager.dayEntities(for: range) { dayEntities in
-                    let days = dayEntities.map { Day(from: $0) }
-                    continuation.resume(returning: days)
-                }
-            } catch {
-                continuation.resume(throwing: error)
-            }
-        }
-    }
-}
-
-//TODO: Move this to DataManager+FoodItem
-public extension DataManager {
-    
-    func deleteMealItem(_ mealFoodItem: MealFoodItem) throws {
-        try coreDataManager.deleteMealItem(mealFoodItem)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            NotificationCenter.default.post(
-                name: .didDeleteFoodItemFromMeal,
-                object: nil,
-                userInfo: [
-                    Notification.Keys.uuid: mealFoodItem.id
-                ]
-            )
-        }
-    }
-    
-    func addNewMealItem(_ mealFoodItem: MealFoodItem, to meal: Meal) throws {
-        guard let user else { throw DataManagerError.noUserFound }
-        
-        var mealFoodItem = mealFoodItem
-        mealFoodItem.sortPosition = meal.nextSortPosition
-        
-        let foodItemEntity = try coreDataManager.createAndSaveMealItem(
-            mealFoodItem,
-            to: meal,
-            for: user.id
-        )
-        
-        let foodItem = FoodItem(from: foodItemEntity)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            NotificationCenter.default.post(
-                name: .didAddFoodItemToMeal,
-                object: nil,
-                userInfo: [
-                    Notification.Keys.foodItem: foodItem
-                ]
-            )
-        }
-    }
-    
-    func updateMealItem(_ mealFoodItem: MealFoodItem, with meal: Meal) throws {
-        
-        let updatedFoodItemEntity = try coreDataManager.updateMealItem(
-            mealFoodItem,
-            with: meal
-        )
-        
-        let updatedFoodItem = FoodItem(from: updatedFoodItemEntity)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            NotificationCenter.default.post(
-                name: .didUpdateMealFoodItem,
-                object: nil,
-                userInfo: [
-                    Notification.Keys.foodItem: updatedFoodItem
-                ]
-            )
-        }
-    }
-}
-
-extension Meal {
-    var nextSortPosition: Int {
-        let sorted = foodItems.sorted(by: { $0.sortPosition > $1.sortPosition })
-        guard let first = sorted.first else { return 1 }
-        return first.sortPosition + 1
+    func deleteMeal(_ meal: DayMeal) throws {
+//        try coreDataManager.deleteMealItem(mealFoodItem)
+//        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+//            NotificationCenter.default.post(
+//                name: .didDeleteFoodItemFromMeal,
+//                object: nil,
+//                userInfo: [
+//                    Notification.Keys.uuid: mealFoodItem.id
+//                ]
+//            )
+//        }
     }
 }
