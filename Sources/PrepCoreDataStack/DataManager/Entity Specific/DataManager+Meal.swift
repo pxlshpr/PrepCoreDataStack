@@ -105,7 +105,21 @@ public extension DataManager {
 //TODO: Move this to DataManager+FoodItem
 public extension DataManager {
     
-    func addNewMealItem(_ mealFoodItem: MealFoodItem, to meal: Meal) throws -> FoodItem {
+    func deleteMealItem(_ mealFoodItem: MealFoodItem) throws {
+        try coreDataManager.deleteMealItem(mealFoodItem)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(
+                name: .didDeleteFoodItemFromMeal,
+                object: nil,
+                userInfo: [
+                    Notification.Keys.uuid: mealFoodItem.id
+                ]
+            )
+        }
+    }
+    
+    func addNewMealItem(_ mealFoodItem: MealFoodItem, to meal: Meal) throws {
         guard let user else { throw DataManagerError.noUserFound }
         
         var mealFoodItem = mealFoodItem
@@ -128,8 +142,26 @@ public extension DataManager {
                 ]
             )
         }
+    }
+    
+    func updateMealItem(_ mealFoodItem: MealFoodItem, with meal: Meal) throws {
         
-        return foodItem
+        let updatedFoodItemEntity = try coreDataManager.updateMealItem(
+            mealFoodItem,
+            with: meal
+        )
+        
+        let updatedFoodItem = FoodItem(from: updatedFoodItemEntity)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(
+                name: .didUpdateMealFoodItem,
+                object: nil,
+                userInfo: [
+                    Notification.Keys.foodItem: updatedFoodItem
+                ]
+            )
+        }
     }
 }
 

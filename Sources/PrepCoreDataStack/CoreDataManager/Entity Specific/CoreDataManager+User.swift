@@ -127,6 +127,14 @@ extension CoreDataManager {
 }
 
 extension CoreDataManager {
+    func foodItemEntity(with id: UUID, context: NSManagedObjectContext) throws -> FoodItemEntity? {
+        let request = NSFetchRequest<FoodItemEntity>(entityName: "FoodItemEntity")
+        request.predicate = NSPredicate(format: "id == %@", id.uuidString)
+        return try context.fetch(request).first
+    }
+}
+
+extension CoreDataManager {
     func foodEntity(with id: UUID, context: NSManagedObjectContext) throws -> FoodEntity? {
         let request = NSFetchRequest<FoodEntity>(entityName: "FoodEntity")
         request.predicate = NSPredicate(format: "id == %@", id.uuidString)
