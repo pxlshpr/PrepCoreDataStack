@@ -15,7 +15,7 @@ let package = Package(
             targets: ["PrepCoreDataStack"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.199"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.207"),
         .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.86"),
     ],
     targets: [
