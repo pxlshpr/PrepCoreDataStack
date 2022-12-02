@@ -42,9 +42,13 @@ public extension DataManager {
         }
     }
     
-    func updateMealItem(_ mealFoodItem: MealFoodItem, dayMeal: DayMeal, sortPosition: Int? = nil) throws {
+    func updateMealItem(
+        _ mealFoodItem: MealFoodItem,
+        dayMeal: DayMeal,
+        sortPosition: Int? = nil
+    ) throws {
         
-        let sortPosition = sortPosition ?? dayMeal.foodItems.count
+        let sortPosition = sortPosition ?? mealFoodItem.sortPosition
         
         let updatedFoodItemEntity = try coreDataManager.updateMealItem(
             mealFoodItem,
@@ -72,8 +76,10 @@ public extension DataManager {
     ) throws {
         
         var sortPosition: Int = dayMeal.foodItems.count
-        if let foodItemToPlaceAfter, let index = dayMeal.foodItems.firstIndex(where: { $0.id == foodItemToPlaceAfter.id }) {
-            sortPosition = index + 1
+        if let foodItemToPlaceAfter
+//           let index = dayMeal.foodItems.firstIndex(where: { $0.id == foodItemToPlaceAfter.id })
+        {
+            sortPosition = foodItemToPlaceAfter.sortPosition
         }
         try updateMealItem(mealFoodItem, dayMeal: dayMeal, sortPosition: sortPosition)
     }
