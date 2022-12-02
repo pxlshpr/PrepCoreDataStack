@@ -101,6 +101,7 @@ public extension DataManager {
         }
         
         var mealFoodItem = mealFoodItem
+        mealFoodItem.id = UUID()
         mealFoodItem.sortPosition = sortPosition
         
         let foodItemEntity = try coreDataManager.createAndSaveMealItem(
