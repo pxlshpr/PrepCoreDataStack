@@ -27,7 +27,11 @@ extension CoreDataManager {
         return foodItemEntity
     }
     
-    func updateMealItem(_ mealFoodItem: MealFoodItem, with meal: Meal) throws -> FoodItemEntity {
+    func updateMealItem(
+        _ mealFoodItem: MealFoodItem,
+        mealId: UUID,
+        sortPosition: Int
+    ) throws -> FoodItemEntity {
         
         guard let foodItemEntity = try foodItemEntity(with: mealFoodItem.id, context: viewContext) else {
             throw CoreDataManagerError.missingFoodItem
@@ -37,7 +41,7 @@ extension CoreDataManager {
             throw CoreDataManagerError.missingFood
         }
         
-        guard let mealEntity = try mealEntity(with: meal.id, context: viewContext) else {
+        guard let mealEntity = try mealEntity(with: mealId, context: viewContext) else {
             throw CoreDataManagerError.missingMeal
         }
         
@@ -48,7 +52,7 @@ extension CoreDataManager {
         
         foodItemEntity.amount = try! JSONEncoder().encode(mealFoodItem.amount)
         foodItemEntity.markedAsEatenAt = mealFoodItem.markedAsEatenAt ?? 0
-        foodItemEntity.sortPosition = Int16(mealFoodItem.sortPosition)
+        foodItemEntity.sortPosition = Int16(sortPosition)
         
         foodItemEntity.syncStatus = SyncStatus.notSynced.rawValue
         foodItemEntity.updatedAt = Date().timeIntervalSince1970

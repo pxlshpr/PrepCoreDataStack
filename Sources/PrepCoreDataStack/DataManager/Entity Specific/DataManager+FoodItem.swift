@@ -42,11 +42,14 @@ public extension DataManager {
         }
     }
     
-    func updateMealItem(_ mealFoodItem: MealFoodItem, with meal: Meal) throws {
+    func updateMealItem(_ mealFoodItem: MealFoodItem, dayMeal: DayMeal, sortPosition: Int? = nil) throws {
+        
+        let sortPosition = sortPosition ?? dayMeal.foodItems.count
         
         let updatedFoodItemEntity = try coreDataManager.updateMealItem(
             mealFoodItem,
-            with: meal
+            mealId: dayMeal.id,
+            sortPosition: sortPosition
         )
         
         let updatedFoodItem = FoodItem(from: updatedFoodItemEntity)
@@ -61,4 +64,27 @@ public extension DataManager {
             )
         }
     }
+    
+    func moveMealItem(
+        _ mealFoodItem: MealFoodItem,
+        to dayMeal: DayMeal,
+        after foodItemToPlaceAfter: MealFoodItem?
+    ) throws {
+        
+        var sortPosition: Int = dayMeal.foodItems.count
+        if let foodItemToPlaceAfter, let index = dayMeal.foodItems.firstIndex(where: { $0.id == foodItemToPlaceAfter.id }) {
+            sortPosition = index + 1
+        }
+        try updateMealItem(mealFoodItem, dayMeal: dayMeal, sortPosition: sortPosition)
+    }
+
+    func duplicateMealItem(
+        _ mealFoodItem: MealFoodItem,
+        to dayMeal: DayMeal,
+        after foodItem: MealFoodItem?
+    ) throws {
+        
+    }
+
+
 }
