@@ -4,13 +4,13 @@ import PrepDataTypes
 extension CoreDataManager {
 
     /// Returns a newly created `FoodItemEntity` after creating and linking an existing `Meal`
-    func createAndSaveMealItem(_ mealFoodItem: MealFoodItem, to meal: Meal, for userId: UUID) throws -> FoodItemEntity {
+    func createAndSaveMealItem(_ mealFoodItem: MealFoodItem, toMealWithId mealId: UUID) throws -> FoodItemEntity {
         
         guard let foodEntity = try foodEntity(with: mealFoodItem.food.id, context: viewContext) else {
             throw CoreDataManagerError.missingFood
         }
         
-        guard let mealEntity = try mealEntity(with: meal.id, context: viewContext) else {
+        guard let mealEntity = try mealEntity(with: mealId, context: viewContext) else {
             throw CoreDataManagerError.missingMeal
         }
         
@@ -77,6 +77,18 @@ extension CoreDataManager {
         return foodItemEntity
     }
         
+    func updateSortPosition(for mealFoodItem: MealFoodItem) throws {
+        
+        guard let foodItemEntity = try foodItemEntity(with: mealFoodItem.id, context: viewContext) else {
+            throw CoreDataManagerError.missingFoodItem
+        }
+        
+        foodItemEntity.sortPosition = Int16(mealFoodItem.sortPosition)
+        foodItemEntity.syncStatus = SyncStatus.notSynced.rawValue
+        foodItemEntity.updatedAt = Date().timeIntervalSince1970
+        try self.viewContext.save()
+    }
+    
     func deleteMealItem(_ mealFoodItem: MealFoodItem) throws {
         guard let foodItemEntity = try foodItemEntity(with: mealFoodItem.id, context: viewContext) else {
             throw CoreDataManagerError.missingFoodItem
