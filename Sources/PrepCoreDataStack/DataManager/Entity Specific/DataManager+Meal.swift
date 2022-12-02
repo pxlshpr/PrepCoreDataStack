@@ -19,7 +19,8 @@ public extension DataManager {
             return try addNewMeal(
                 named: dayMeal.name,
                 at: Date(timeIntervalSince1970: dayMeal.time),
-                on: date
+                on: date,
+                with: nil
             )
         }
         print("🍽 Returning existing meal")
@@ -42,7 +43,12 @@ public extension DataManager {
 
 //MARK: Create / Update / Delete
 public extension DataManager {
-    func addNewMeal(named name: String, at time: Date, on date: Date) throws -> Meal {
+    func addNewMeal(
+        named name: String,
+        at time: Date,
+        on date: Date,
+        with goalSet: GoalSet?
+    ) throws -> Meal {
         guard let user else {
             throw DataManagerError.noUserFound
         }
@@ -53,6 +59,7 @@ public extension DataManager {
             named: name,
             at: time,
             on: date,
+            with: goalSet,
             for: user.id
         )
 

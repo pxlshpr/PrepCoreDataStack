@@ -40,9 +40,12 @@ extension CoreDataManager {
         guard let mealEntity = try mealEntity(with: meal.id, context: viewContext) else {
             throw CoreDataManagerError.missingMeal
         }
+        
+        let mealChanged = foodItemEntity.meal?.id != mealEntity.id
 
         foodItemEntity.food = foodEntity
         foodItemEntity.meal = mealEntity
+        
         foodItemEntity.amount = try! JSONEncoder().encode(mealFoodItem.amount)
         foodItemEntity.markedAsEatenAt = mealFoodItem.markedAsEatenAt ?? 0
         foodItemEntity.sortPosition = Int16(mealFoodItem.sortPosition)
@@ -51,6 +54,22 @@ extension CoreDataManager {
         foodItemEntity.updatedAt = Date().timeIntervalSince1970
 
         try self.viewContext.save()
+        
+        if mealChanged {
+            /// Send notifications for UI to handle the meal change
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                NotificationCenter.default.post(name: .didDeleteFoodItemFromMeal, object: nil, userInfo: [
+                    Notification.Keys.uuid: mealFoodItem.id
+                ])
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    let foodItem = FoodItem(from: foodItemEntity)
+                    NotificationCenter.default.post(name: .didAddFoodItemToMeal, object: nil, userInfo: [
+                        Notification.Keys.foodItem: foodItem
+                    ])
+//                }
+            }
+        }
+        
         return foodItemEntity
     }
         

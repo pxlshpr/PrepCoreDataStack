@@ -21,13 +21,15 @@ extension MealEntity {
         context: NSManagedObjectContext,
         name: String,
         time: Date,
-        dayEntity: DayEntity
+        dayEntity: DayEntity,
+        goalSetEntity: GoalSetEntity?
     ) {
         self.init(context: context)
         self.id = UUID()
         self.name = name
         self.time = time.timeIntervalSince1970
         self.markedAsEatenAt = 0
+        self.goalSet = goalSetEntity
         self.goalWorkoutMinutes = 0
         self.updatedAt = Date().timeIntervalSince1970
         self.deletedAt = 0

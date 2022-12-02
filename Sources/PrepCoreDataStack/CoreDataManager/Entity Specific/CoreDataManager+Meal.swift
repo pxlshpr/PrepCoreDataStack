@@ -4,13 +4,32 @@ import PrepDataTypes
 extension CoreDataManager {
  
     /// Returns a newly created `MealEntity` after creating and linking a newly created `DayEntity` if needed
-    func createAndSaveMealEntity(named name: String, at time: Date, on date: Date, for userId: UUID) throws -> MealEntity {
+    func createAndSaveMealEntity(
+        named name: String,
+        at time: Date,
+        on date: Date,
+        with goalSet: GoalSet?,
+        for userId: UUID
+    ) throws -> MealEntity {
+        
+        let goalSetEntity: GoalSetEntity?
+        if let goalSet {
+            guard let entity = try fetchGoalSetEntity(with: goalSet.id.uuidString, context: viewContext) else {
+                throw CoreDataManagerError.missingGoalSetEntity
+            }
+            goalSetEntity = entity
+        } else {
+            goalSetEntity = nil
+        }
+        
         let dayEntity = try fetchOrCreateDayEntity(on: date, for: userId)
+        
         let mealEntity = MealEntity(
             context: viewContext,
             name: name,
             time: time,
-            dayEntity: dayEntity
+            dayEntity: dayEntity,
+            goalSetEntity: goalSetEntity
         )
         self.viewContext.insert(mealEntity)
         try self.viewContext.save()
