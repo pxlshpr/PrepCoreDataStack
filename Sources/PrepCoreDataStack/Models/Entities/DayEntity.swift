@@ -8,6 +8,7 @@ extension DayEntity {
         self.init(context: context)
         self.id = day.id
         self.calendarDayString = day.calendarDayString
+        self.bodyProfile = try! JSONEncoder().encode(day.bodyProfile)
         self.updatedAt = day.updatedAt
         self.syncStatus = day.syncStatus.rawValue
     }

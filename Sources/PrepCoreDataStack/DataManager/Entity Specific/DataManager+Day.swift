@@ -3,6 +3,15 @@ import PrepDataTypes
 
 public extension DataManager {
     
+    /// Get a `Day` for a provided `Date` on the main thread.
+    func day(for date: Date) throws -> Day? {
+        guard let dayEntity = try coreDataManager.fetchDayEntity(for: date, context: coreDataManager.viewContext) else {
+            return nil
+        }
+        return Day(from: dayEntity)
+    }
+    
+    /// Get a `Day` for a provided `Date` asynchronously—so keep thread safety in mind when using this.
     func getDay(for date: Date) async throws -> Day? {
         try await withCheckedThrowingContinuation { continuation in
             do {

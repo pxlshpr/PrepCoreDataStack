@@ -5,10 +5,11 @@ public extension DataManager {
     
     func addGoalSetAndBodyProfile(_ goalSet: GoalSet, bodyProfile: BodyProfile?) {
         do {
+            try DataManager.shared.addNewGoalSet(goalSet)
+            
             if let bodyProfile {
                 try DataManager.shared.setBodyProfile(bodyProfile)
             }
-            try DataManager.shared.addNewGoalSet(goalSet)
         } catch {
             print("Error adding or setting goal set")
         }

@@ -1,4 +1,5 @@
 import CoreData
+import PrepDataTypes
 
 /// Day
 extension CoreDataManager {
@@ -66,5 +67,21 @@ extension CoreDataManager {
                 }
             }
         }
+    }
+    
+    /// Returns true if a `Day` was found and updated
+    func updateDate(_ date: Date, with bodyProfile: BodyProfile) throws -> Bool {
+        
+        guard let dayEntity = try fetchDayEntity(for: date, context: viewContext) else {
+            return false
+        }
+        
+        dayEntity.bodyProfile = try! JSONEncoder().encode(bodyProfile)
+        dayEntity.syncStatus = SyncStatus.notSynced.rawValue
+        dayEntity.updatedAt = Date().timeIntervalSince1970
+
+        try self.viewContext.save()
+        
+        return true
     }
 }

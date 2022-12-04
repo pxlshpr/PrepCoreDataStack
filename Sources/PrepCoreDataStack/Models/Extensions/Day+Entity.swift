@@ -10,10 +10,19 @@ public extension Day {
         } else {
             goalSet = nil
         }
+        
+        let bodyProfile: BodyProfile?
+        if let bodyProfileData = entity.bodyProfile {
+            bodyProfile = try? JSONDecoder().decode(BodyProfile.self, from: bodyProfileData)
+        } else {
+            bodyProfile = nil
+        }
+
         self.init(
             id: entity.id!,
             calendarDayString: entity.calendarDayString!,
             goalSet: goalSet,
+            bodyProfile: bodyProfile,
             meals: entity.dayMeals,
             syncStatus: SyncStatus(rawValue: entity.syncStatus) ?? .notSynced,
             updatedAt: entity.updatedAt

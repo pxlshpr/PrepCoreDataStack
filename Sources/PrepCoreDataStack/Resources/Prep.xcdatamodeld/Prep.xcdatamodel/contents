@@ -12,6 +12,7 @@
         </uniquenessConstraints>
     </entity>
     <entity name="DayEntity" representedClassName="DayEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="bodyProfile" optional="YES" attributeType="Binary"/>
         <attribute name="calendarDayString" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="syncStatus" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
