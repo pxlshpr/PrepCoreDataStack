@@ -49,6 +49,18 @@ public extension DataManager {
         }
     }
     
+    var lastUsedGoalSet: GoalSet? {
+        do {
+            guard let entity = try coreDataManager.lastUsedDayGoalSetEntity() else {
+                return nil
+            }
+            return GoalSet(from: entity)
+        } catch {
+            print("Error getting last used diet")
+            return nil
+        }
+    }
+    
     func getGoalSets() async throws -> [GoalSet] {
         try await withCheckedThrowingContinuation { continuation in
             do {

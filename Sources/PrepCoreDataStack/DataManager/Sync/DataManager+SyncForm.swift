@@ -51,6 +51,11 @@ extension DataManager {
                 if let foodEntities = updatedEntities.foodEntities {
                     foods = foodEntities.map { Food(from: $0) }
                 }
+                
+                /// `FoodItemEntity`
+                
+                /// `GoalSetEntity`
+
 
                 let updated = SyncForm.Updates(
                     user: user,

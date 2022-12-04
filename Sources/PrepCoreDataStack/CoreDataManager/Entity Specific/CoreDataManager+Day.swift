@@ -25,6 +25,11 @@ extension CoreDataManager {
 
     func createDayEntity(on date: Date, for userId: UUID) throws -> DayEntity {
         let dayEntity = DayEntity(context: viewContext, date: date, userId: userId)
+        
+        if let lastGoalSetEntity = try lastUsedDayGoalSetEntity(context: viewContext) {
+            dayEntity.goalSet = lastGoalSetEntity
+        }
+        
         self.viewContext.insert(dayEntity)
         return dayEntity
     }

@@ -29,6 +29,21 @@ extension CoreDataManager {
             }
         }
     }
+    
+    func lastUsedDayGoalSetEntity(context: NSManagedObjectContext? = nil) throws -> GoalSetEntity? {
+        let context = context ?? self.viewContext
+        let request: NSFetchRequest<DayEntity> = DayEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "goalSet != NULL")
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \DayEntity.calendarDayString, ascending: false),
+        ]
+        request.fetchLimit = 1
+        let entities = try context.fetch(request)
+        guard let dayEntity = entities.first else {
+            return nil
+        }
+        return dayEntity.goalSet
+    }
 }
 
 extension CoreDataManager {
