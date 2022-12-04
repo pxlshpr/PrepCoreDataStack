@@ -19,6 +19,8 @@ extension DataManager {
             userId: userId,
             versionTimestamp: versionTimestamp
         )
+        let size = MemoryLayout.size(ofValue: form)
+        print("Sending sync form of size: \(size)")
         return form
     }
 
@@ -52,15 +54,22 @@ extension DataManager {
                     foods = foodEntities.map { Food(from: $0) }
                 }
                 
-                /// `FoodItemEntity`
-                
-                /// `GoalSetEntity`
+                var foodItems: [FoodItem]? = nil
+                if let foodItemEntities = updatedEntities.foodItemEntities {
+                    foodItems = foodItemEntities.map { FoodItem(from: $0) }
+                }
 
+                var goalSets: [GoalSet]? = nil
+                if let goalSetEntities = updatedEntities.goalSetEntities {
+                    goalSets = goalSetEntities.map { GoalSet(from: $0) }
+                }
 
                 let updated = SyncForm.Updates(
                     user: user,
                     days: days,
                     foods: foods,
+                    foodItems: foodItems,
+                    goalSets: goalSets,
                     meals: meals
                 )
 
@@ -285,15 +294,25 @@ extension DataManager {
                 if let user = updates.user {
                     try self.updateUser(with: user, in: bgContext)
                 }
-                if let days = updates.days, !days.isEmpty {
-                    try self.createOrUpdateDays(days, in: bgContext)
-                }
-                if let meals = updates.meals, !meals.isEmpty {
-                    try self.createOrUpdateMeals(meals, in: bgContext)
+
+                if let goalSets = updates.goalSets, !goalSets.isEmpty {
+                    try self.createOrUpdateGoalSets(goalSets, in: bgContext)
                 }
                 
                 if let foods = updates.foods, !foods.isEmpty {
                     try self.createOrUpdateFoodsAndBarcodes(foods, in: bgContext)
+                }
+                
+                if let days = updates.days, !days.isEmpty {
+                    try self.createOrUpdateDays(days, in: bgContext)
+                }
+                
+                if let meals = updates.meals, !meals.isEmpty {
+                    try self.createOrUpdateMeals(meals, in: bgContext)
+                }
+                
+                if let foodItems = updates.foodItems, !foodItems.isEmpty {
+                    try self.createOrUpdateFoodItems(foodItems, in: bgContext)
                 }
                 
             } catch {
@@ -353,6 +372,98 @@ extension DataManager {
         ///     we don't need to post notifications about this right now (Diary View will simply get meals being added)
     }
     
+    //MARK: - FoodItems
+    func createOrUpdateFoodItems(_ foodItems: [FoodItem], in context: NSManagedObjectContext) throws {
+        try foodItems.forEach { foodItem in
+            try createOrUpdateFoodItem(foodItem, in: context)
+        }
+
+        //TODO: Consider these and revisit the decision to and how we are sending a notification
+        /// Do we need this? And if so, do we need to send *all* created food items,
+        /// For instance, when a new app instance is launched?
+        /// Shouldn't it be just for the sliding window we currently have?
+        /// What about `FoodItem`s that describe children food items for recipes and plates?
+        DispatchQueue.main.async {
+            /// Send a notification on the main thread
+            NotificationCenter.default.post(
+                name: .didUpdateFoodItems,
+                object: nil,
+                userInfo: [Notification.Keys.foodItems: foodItems]
+            )
+        }
+    }
+    
+    func createOrUpdateFoodItem(
+        _ serverFoodItem: FoodItem,
+        in context: NSManagedObjectContext
+    ) throws {
+        
+        guard let foodEntity = try coreDataManager.foodEntity(with: serverFoodItem.food.id, context: context) else {
+            throw CoreDataManagerError.missingFood
+        }
+        
+        guard let mealId = serverFoodItem.meal?.id,
+              let mealEntity = try coreDataManager.mealEntity(with: mealId, context: context) else {
+            throw CoreDataManagerError.missingMeal
+        }
+
+        if let foodItem = try coreDataManager.foodItemEntity(
+            with: serverFoodItem.id,
+            context: context
+        ) {
+            print("📝 Updating existing FoodItem")
+            try foodItem.update(amount: serverFoodItem.amount, markedAsEatenAt: serverFoodItem.markedAsEatenAt, foodEntity: foodEntity, mealEntity: mealEntity, sortPosition: serverFoodItem.sortPosition, in: context)
+        } else {
+            print("✨ Inserting FoodItem")
+            let foodItemEntity = FoodItemEntity(context: context, foodItem: serverFoodItem, foodEntity: foodEntity, mealEntity: mealEntity)
+            context.insert(foodItemEntity)
+        }
+
+        try context.save()
+    }
+    
+    //MARK: - GoalSets
+    func createOrUpdateGoalSets(_ goalSets: [GoalSet], in context: NSManagedObjectContext) throws {
+        try goalSets.forEach { goalSet in
+            try createOrUpdateGoalSet(goalSet, in: context)
+        }
+
+        //TODO: Respond to notification so that we may update the UI with it
+        /// [ ] Update list of GoalSet (Diets or MealTypes) if we're on it
+        /// [ ] Update DaySummary if we're on it
+        /// [ ] Update the bottom of Day if we're on it
+        DispatchQueue.main.async {
+            /// Send a notification on the main thread
+            NotificationCenter.default.post(
+                name: .didUpdateGoalSets,
+                object: nil,
+                userInfo: [Notification.Keys.goalSets: goalSets]
+            )
+        }
+    }
+    
+    func createOrUpdateGoalSet(
+        _ serverGoalSet: GoalSet,
+        in context: NSManagedObjectContext
+    ) throws {
+        
+        if let existingGoalSetEntity = try coreDataManager.fetchGoalSetEntity(
+            with: serverGoalSet.id,
+            context: context
+        ) {
+            print("📝 Updating existing GoalSet")
+            try existingGoalSetEntity.update(with: serverGoalSet, in: context)
+        } else {
+            print("✨ Inserting GoalSet")
+            let goalSetEntity = GoalSetEntity(context: context, goalSet: serverGoalSet)
+            context.insert(goalSetEntity)
+        }
+
+        try context.save()
+    }
+    
+    //MARK: - Meals
+    
     func createOrUpdateMeals(_ meals: [Meal], in context: NSManagedObjectContext) throws {
         try meals.forEach { meal in
             try createOrUpdateMeal(meal, in: context)
@@ -366,12 +477,6 @@ extension DataManager {
                 userInfo: [Notification.Keys.meals: meals]
             )
         }
-        /// If the meal exists—we've probably changed the completion state, or name, time, etc.
-        ///     so simply update it by replacing it
-        ///     send a notification saying that the `Meal` was changed
-        /// Otherwise
-        ///     add it
-        ///     send the notification saying that the `Meal` was added
     }
     
     func createOrUpdateMeal(_ serverMeal: Meal, in context: NSManagedObjectContext) throws {
@@ -388,13 +493,6 @@ extension DataManager {
         }
         
         try context.save()
-
-        /// If the day exists—we've probably changed the goal, or goal params
-        ///     so simply update it by replacing it
-        ///     send a notification saying that the `Day` was changed
-        /// Otherwise
-        ///     add it
-        ///     we don't need to post notifications about this right now (Diary View will simply get meals being added)
     }
 
     //MARK: - Foods

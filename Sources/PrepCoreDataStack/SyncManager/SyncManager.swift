@@ -1,11 +1,11 @@
 import Foundation
 import PrepDataTypes
 
-let SyncInterval = 20.0
+let SyncInterval: Double = 2
 
 public class SyncManager {
     
-    let networkManager = NetworkManager.server
+    let networkManager = NetworkManager.local
     let dataManager = DataManager.shared
 
     public static let shared = SyncManager()

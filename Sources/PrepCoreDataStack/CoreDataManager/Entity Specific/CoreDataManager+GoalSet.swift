@@ -51,7 +51,7 @@ extension CoreDataManager {
         let dayEntity = try fetchOrCreateDayEntity(on: date, for: userId)
         
         /// Fetch `GoalSetEntity` with `id`
-        guard let goalSetEntity = try fetchGoalSetEntity(with: goalSet.id.uuidString, context: viewContext) else {
+        guard let goalSetEntity = try fetchGoalSetEntity(with: goalSet.id, context: viewContext) else {
             throw CoreDataManagerError.missingGoalSetEntity
         }
         

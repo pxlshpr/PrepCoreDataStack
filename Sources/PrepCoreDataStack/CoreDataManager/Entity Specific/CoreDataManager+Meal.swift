@@ -14,7 +14,7 @@ extension CoreDataManager {
         
         let goalSetEntity: GoalSetEntity?
         if let goalSet {
-            guard let entity = try fetchGoalSetEntity(with: goalSet.id.uuidString, context: viewContext) else {
+            guard let entity = try fetchGoalSetEntity(with: goalSet.id, context: viewContext) else {
                 throw CoreDataManagerError.missingGoalSetEntity
             }
             goalSetEntity = entity

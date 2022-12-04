@@ -45,34 +45,43 @@ extension CoreDataManager {
             throw CoreDataManagerError.missingMeal
         }
         
-        let mealChanged = foodItemEntity.meal?.id != mealEntity.id
-
-        foodItemEntity.food = foodEntity
-        foodItemEntity.meal = mealEntity
+        try foodItemEntity.update(
+            amount: mealFoodItem.amount,
+            markedAsEatenAt: mealFoodItem.markedAsEatenAt,
+            foodEntity: foodEntity,
+            mealEntity: mealEntity,
+            sortPosition: sortPosition,
+            in: self.viewContext
+        )
         
-        foodItemEntity.amount = try! JSONEncoder().encode(mealFoodItem.amount)
-        foodItemEntity.markedAsEatenAt = mealFoodItem.markedAsEatenAt ?? 0
-        foodItemEntity.sortPosition = Int16(sortPosition)
-        
-        foodItemEntity.syncStatus = SyncStatus.notSynced.rawValue
-        foodItemEntity.updatedAt = Date().timeIntervalSince1970
-
-        try self.viewContext.save()
-        
-        if mealChanged {
-            /// Send notifications for UI to handle the meal change
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                NotificationCenter.default.post(name: .didDeleteFoodItemFromMeal, object: nil, userInfo: [
-                    Notification.Keys.uuid: mealFoodItem.id
-                ])
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    let foodItem = FoodItem(from: foodItemEntity)
-                    NotificationCenter.default.post(name: .didAddFoodItemToMeal, object: nil, userInfo: [
-                        Notification.Keys.foodItem: foodItem
-                    ])
-//                }
-            }
-        }
+//        let mealChanged = foodItemEntity.meal?.id != mealEntity.id
+//
+//        foodItemEntity.food = foodEntity
+//        foodItemEntity.meal = mealEntity
+//
+//        foodItemEntity.amount = try! JSONEncoder().encode(mealFoodItem.amount)
+//        foodItemEntity.markedAsEatenAt = mealFoodItem.markedAsEatenAt ?? 0
+//        foodItemEntity.sortPosition = Int16(sortPosition)
+//
+//        foodItemEntity.syncStatus = SyncStatus.notSynced.rawValue
+//        foodItemEntity.updatedAt = Date().timeIntervalSince1970
+//
+//        try self.viewContext.save()
+//
+//        if mealChanged {
+//            /// Send notifications for UI to handle the meal change
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+//                NotificationCenter.default.post(name: .didDeleteFoodItemFromMeal, object: nil, userInfo: [
+//                    Notification.Keys.uuid: mealFoodItem.id
+//                ])
+////                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+//                    let foodItem = FoodItem(from: foodItemEntity)
+//                    NotificationCenter.default.post(name: .didAddFoodItemToMeal, object: nil, userInfo: [
+//                        Notification.Keys.foodItem: foodItem
+//                    ])
+////                }
+//            }
+//        }
         
         return foodItemEntity
     }

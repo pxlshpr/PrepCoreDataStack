@@ -103,9 +103,9 @@ extension CoreDataManager {
 }
 
 extension CoreDataManager {
-    func fetchGoalSetEntity(with id: String, context: NSManagedObjectContext) throws -> GoalSetEntity? {
+    func fetchGoalSetEntity(with id: UUID, context: NSManagedObjectContext) throws -> GoalSetEntity? {
         let request = NSFetchRequest<GoalSetEntity>(entityName: "GoalSetEntity")
-        request.predicate = NSPredicate(format: "id == %@", id)
+        request.predicate = NSPredicate(format: "id == %@", id.uuidString)
         return try context.fetch(request).first
     }
 }
@@ -165,12 +165,22 @@ extension CoreDataManager {
                 let foodsRequest = NSFetchRequest<FoodEntity>(entityName: "FoodEntity")
                 foodsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
                 let foodEntities = try bgContext.fetch(foodsRequest)
+                
+                let foodItemsRequest = NSFetchRequest<FoodItemEntity>(entityName: "FoodItemEntity")
+                foodItemsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
+                let foodItemEntities = try bgContext.fetch(foodItemsRequest)
+
+                let goalSetsRequest = NSFetchRequest<GoalSetEntity>(entityName: "GoalSetEntity")
+                goalSetsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
+                let goalSetEntities = try bgContext.fetch(goalSetsRequest)
 
                 let updatedEntites = UpdatedEntities(
                     userEntity: userEntity,
                     dayEntities: dayEntities,
                     mealEntities: mealEntities,
-                    foodEntities: foodEntities
+                    foodEntities: foodEntities,
+                    foodItemEntities: foodItemEntities,
+                    goalSetEntities: goalSetEntities
                 )
                 
                 completion(updatedEntites)
@@ -186,4 +196,6 @@ struct UpdatedEntities {
     let dayEntities: [DayEntity]?
     let mealEntities: [MealEntity]?
     let foodEntities: [FoodEntity]?
+    let foodItemEntities: [FoodItemEntity]?
+    let goalSetEntities: [GoalSetEntity]?
 }

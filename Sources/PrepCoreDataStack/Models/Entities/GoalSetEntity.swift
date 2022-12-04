@@ -16,3 +16,14 @@ extension GoalSetEntity {
         self.deletedAt = goalSet.deletedAt ?? 0
     }
 }
+
+extension GoalSetEntity {
+    func update(with serverGoalSet: GoalSet, in context: NSManagedObjectContext) throws {
+        name = serverGoalSet.name
+        emoji = serverGoalSet.emoji
+        type = Int16(serverGoalSet.type.rawValue)
+        goals = try! JSONEncoder().encode(serverGoalSet.goals)
+        syncStatus = SyncStatus.synced.rawValue
+        updatedAt = serverGoalSet.updatedAt
+    }
+}
