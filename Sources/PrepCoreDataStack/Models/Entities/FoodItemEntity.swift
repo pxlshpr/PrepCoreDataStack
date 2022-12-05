@@ -62,6 +62,7 @@ extension FoodItemEntity {
         sortPosition: Int,
         syncStatus: SyncStatus,
         updatedAt: Double = Date().timeIntervalSince1970,
+        deletedAt: Double? = 0,
         postNotifications: Bool,
         in context: NSManagedObjectContext
     ) throws {
@@ -85,6 +86,7 @@ extension FoodItemEntity {
         self.syncStatus = syncStatus.rawValue
         
         self.updatedAt = updatedAt
+        self.deletedAt = deletedAt ?? 0
 
         try context.save()
 

@@ -126,6 +126,16 @@ extension CoreDataManager {
         request.predicate = NSPredicate(format: "id == %@", id.uuidString)
         return try context.fetch(request).first
     }
+    
+    func hardDeleteMealEntity(with id: UUID, context: NSManagedObjectContext) throws {
+        guard let mealEntity = try mealEntity(with: id, context: context) else {
+            /// It's already been deleted
+            return
+        }
+        /// This will cascade deletions to `FoodItem`s too
+        context.delete(mealEntity)
+        try context.save()
+    }
 }
 
 extension CoreDataManager {
@@ -134,6 +144,16 @@ extension CoreDataManager {
         request.predicate = NSPredicate(format: "id == %@", id.uuidString)
         return try context.fetch(request).first
     }
+    
+    func hardDeleteFoodItemEntity(with id: UUID, context: NSManagedObjectContext) throws {
+        guard let entity = try foodItemEntity(with: id, context: context) else {
+            /// It's already been deleted
+            return
+        }
+        context.delete(entity)
+        try context.save()
+    }
+
 }
 
 extension CoreDataManager {
@@ -180,11 +200,6 @@ extension CoreDataManager {
                 let foodItemsRequest = NSFetchRequest<FoodItemEntity>(entityName: "FoodItemEntity")
                 foodItemsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
                 let foodItemEntities = try bgContext.fetch(foodItemsRequest)
-                if foodItemEntities.count > 0 {
-                    print("🤡 Got back \(foodItemEntities.count) FoodItemEntities with SyncStatus as notSynced")
-                } else {
-                    print("▪️ Got back \(foodItemEntities.count) FoodItemEntities with SyncStatus as notSynced")
-                }
 
                 let goalSetsRequest = NSFetchRequest<GoalSetEntity>(entityName: "GoalSetEntity")
                 goalSetsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)

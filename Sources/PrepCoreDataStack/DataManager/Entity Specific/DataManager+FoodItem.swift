@@ -4,7 +4,7 @@ import PrepDataTypes
 public extension DataManager {
     
     func deleteMealItem(_ mealFoodItem: MealFoodItem) throws {
-        try coreDataManager.deleteMealItem(mealFoodItem)
+        try coreDataManager.softDeleteMealItem(mealFoodItem)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             NotificationCenter.default.post(

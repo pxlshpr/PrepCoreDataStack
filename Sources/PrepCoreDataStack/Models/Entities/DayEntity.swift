@@ -41,10 +41,16 @@ extension DayEntity {
 
 extension DayEntity {
     
-    var mealEntities: [MealEntity] {
+    var allMealEntitiesIncludingSoftDeleted: [MealEntity] {
         meals?.allObjects as? [MealEntity] ?? []
     }
-    
+
+    /// Include only those that haven't been soft-deleted
+    var mealEntities: [MealEntity] {
+        allMealEntitiesIncludingSoftDeleted
+            .filter({ $0.deletedAt == 0 })
+    }
+
     var dayMeals: [DayMeal] {
         mealEntities
             .map { DayMeal(from: $0) }

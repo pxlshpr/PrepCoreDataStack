@@ -10,7 +10,7 @@ extension DataManager {
         }
         
         let updates = try await constructSyncUpdates()
-        let deletions = syncDeletions
+        let deletions = try await constructSyncDeletions()
         let form = SyncForm(
             updates: updates,
             deletions: deletions,
@@ -22,11 +22,10 @@ extension DataManager {
         return form
     }
 
-    var syncDeletions: SyncForm.Deletions {
-        //TODO: Include all entities (except `UserEntity`) with a deletedAt greater than versionTimestamp
+    func constructSyncDeletions() async throws -> SyncForm.Deletions {
         SyncForm.Deletions()
     }
-
+    
     /// Include all entities that have an updatedAt greater than versionTimestamp
     func constructSyncUpdates() async throws -> SyncForm.Updates {
         try await withCheckedThrowingContinuation { continuation in
@@ -437,6 +436,20 @@ extension DataManager {
         in context: NSManagedObjectContext
     ) throws {
         
+        let shouldDelete: Bool
+        /// Check that it has a deleted at timestamp **and** belongs to a meal (as we do not hard delete food items that are children of others (since these represent past recipes and plates, which we want to keep around)
+        if let deletedAt = serverFoodItem.deletedAt, deletedAt > 0, serverFoodItem.meal != nil {
+            shouldDelete = true
+        } else {
+            shouldDelete = false
+        }
+        
+        guard !shouldDelete else {
+            print("🗑 Deleting FoodItem")
+            try coreDataManager.hardDeleteFoodItemEntity(with: serverFoodItem.id, context: context)
+            return
+        }
+        
         guard let foodEntity = try coreDataManager.foodEntity(with: serverFoodItem.food.id, context: context) else {
             throw CoreDataManagerError.missingFood
         }
@@ -459,6 +472,7 @@ extension DataManager {
                 sortPosition: serverFoodItem.sortPosition,
                 syncStatus: .synced,
                 updatedAt: serverFoodItem.updatedAt,
+                deletedAt: serverFoodItem.deletedAt,
                 postNotifications: false,
                 in: context
             )
@@ -540,25 +554,36 @@ extension DataManager {
             goalSetEntity = nil
         }
         
-
-        if let meal = try coreDataManager.mealEntity(with: serverMeal.id, context: context) {
+        if let deletedAt = serverMeal.deletedAt, deletedAt > 0 {
+            
+            print("🗑 Deleting Meal")
+            try coreDataManager.hardDeleteMealEntity(with: serverMeal.id, context: context)
+            
+        } else if let meal = try coreDataManager.mealEntity(with: serverMeal.id, context: context) {
+            
             print("📝 Updating existing Meal")
             try meal.update(
                 with: serverMeal,
                 goalSetEntity: goalSetEntity,
                 in: context
             )
+            
         } else {
-            guard let dayEntity = try coreDataManager.fetchDayEntity(calendarDayString: serverMeal.day.calendarDayString, context: context) else {
+            
+            guard let dayEntity = try coreDataManager.fetchDayEntity(
+                calendarDayString: serverMeal.day.calendarDayString,
+                context: context
+            ) else {
                 throw DataManagerError.noDayFoundWhenInsertingMealFromServer
             }
+            
             let mealEntity = MealEntity(
                 context: context,
                 meal: serverMeal,
                 dayEntity: dayEntity,
                 goalSetEntity: goalSetEntity
             )
-            print("✨ Inserting Meal")
+            print("✨ Creating Meal")
             context.insert(mealEntity)
         }
         

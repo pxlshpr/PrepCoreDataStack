@@ -46,8 +46,7 @@ extension CoreDataManager {
                         completion([])
                         return
                     }
-                    let meals = day.meals?.allObjects as? [MealEntity] ?? []
-                    completion(meals)
+                    completion(day.mealEntities)
                 } catch {
                     print("Error: \(error)")
                     completion([])
@@ -56,14 +55,19 @@ extension CoreDataManager {
         }
     }
     
-    /// Deletes meal from a `DayMeal` and returns the `Day` it belonged to so that we can manually remove it from the UI
-    func deleteMeal(_ meal: DayMeal) throws {
-        guard let meal = try mealEntity(with: meal.id, context: viewContext)
+    /// Soft Deletes a meal by setting its `deletedAt` timestamp and queuing it for a sync
+    /// We're not soft-deleting the `FoodItem`s here as they won't appear in the UI any longer
+    /// (since they're not part of a visible meal), and the eventual hard-delete of the meal
+    /// (after the object is synced) will cascade the hard-deletion of those
+    func softDeleteMeal(_ meal: DayMeal) throws {
+        guard let mealEntity = try mealEntity(with: meal.id, context: viewContext)
         else {
             throw CoreDataManagerError.missingMeal
         }
         
-        self.viewContext.delete(meal)
+        mealEntity.deletedAt = Date().timeIntervalSince1970
+        mealEntity.syncStatus = Int16(SyncStatus.notSynced.rawValue)
+        
         try self.viewContext.save()
     }
 }

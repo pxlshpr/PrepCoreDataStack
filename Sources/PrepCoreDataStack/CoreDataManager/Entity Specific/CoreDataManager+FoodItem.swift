@@ -100,12 +100,14 @@ extension CoreDataManager {
         try self.viewContext.save()
     }
     
-    func deleteMealItem(_ mealFoodItem: MealFoodItem) throws {
+    func softDeleteMealItem(_ mealFoodItem: MealFoodItem) throws {
         guard let foodItemEntity = try foodItemEntity(with: mealFoodItem.id, context: viewContext) else {
             throw CoreDataManagerError.missingFoodItem
         }
         
-        self.viewContext.delete(foodItemEntity)
+        foodItemEntity.deletedAt = Date().timeIntervalSince1970
+        foodItemEntity.syncStatus = Int16(SyncStatus.notSynced.rawValue)
+        
         try self.viewContext.save()
     }
 }

@@ -78,7 +78,7 @@ public extension DataManager {
     }
     
     func deleteMeal(_ meal: DayMeal) throws {
-        try coreDataManager.deleteMeal(meal)
+        try coreDataManager.softDeleteMeal(meal)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             NotificationCenter.default.post(
