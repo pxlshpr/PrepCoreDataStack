@@ -51,6 +51,8 @@ extension CoreDataManager {
             foodEntity: foodEntity,
             mealEntity: mealEntity,
             sortPosition: sortPosition,
+            syncStatus: .notSynced,
+            postNotifications: true,
             in: self.viewContext
         )
         

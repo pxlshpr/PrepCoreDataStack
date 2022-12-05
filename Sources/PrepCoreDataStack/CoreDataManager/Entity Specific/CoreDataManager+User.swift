@@ -103,7 +103,8 @@ extension CoreDataManager {
 }
 
 extension CoreDataManager {
-    func fetchGoalSetEntity(with id: UUID, context: NSManagedObjectContext) throws -> GoalSetEntity? {
+    func fetchGoalSetEntity(with id: UUID, context: NSManagedObjectContext? = nil) throws -> GoalSetEntity? {
+        let context = context ?? viewContext
         let request = NSFetchRequest<GoalSetEntity>(entityName: "GoalSetEntity")
         request.predicate = NSPredicate(format: "id == %@", id.uuidString)
         return try context.fetch(request).first
@@ -144,6 +145,16 @@ extension CoreDataManager {
 }
 
 extension CoreDataManager {
+    func foodItemEntities(with syncStatus: SyncStatus) -> [FoodItemEntity] {
+        do {
+            let request = NSFetchRequest<FoodItemEntity>(entityName: "FoodItemEntity")
+            request.predicate = NSPredicate(format: "syncStatus == %d", syncStatus.rawValue)
+            return try viewContext.fetch(request)
+        } catch {
+            fatalError("Fetch error with notSyncedFoodItemEntities: \(error)")
+        }
+    }
+    
     func updatedEntities(completion: ((UpdatedEntities) -> ())) {
         let bgContext = newBackgroundContext()
         do {
@@ -169,6 +180,11 @@ extension CoreDataManager {
                 let foodItemsRequest = NSFetchRequest<FoodItemEntity>(entityName: "FoodItemEntity")
                 foodItemsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
                 let foodItemEntities = try bgContext.fetch(foodItemsRequest)
+                if foodItemEntities.count > 0 {
+                    print("🤡 Got back \(foodItemEntities.count) FoodItemEntities with SyncStatus as notSynced")
+                } else {
+                    print("▪️ Got back \(foodItemEntities.count) FoodItemEntities with SyncStatus as notSynced")
+                }
 
                 let goalSetsRequest = NSFetchRequest<GoalSetEntity>(entityName: "GoalSetEntity")
                 goalSetsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)

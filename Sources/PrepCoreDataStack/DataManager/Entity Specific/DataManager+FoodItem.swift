@@ -66,6 +66,10 @@ public extension DataManager {
         }
     }
     
+    func numberOfFoodItems(with syncStatus: SyncStatus) -> Int {
+        coreDataManager.foodItemEntities(with: syncStatus).count
+    }
+
     func silentlyUpdateSortPosition(for mealFoodItem: MealFoodItem) throws {
         try coreDataManager.updateSortPosition(for: mealFoodItem)
     }

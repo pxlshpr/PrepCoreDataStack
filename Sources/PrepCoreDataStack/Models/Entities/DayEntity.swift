@@ -4,10 +4,11 @@ import CoreData
 
 //MARK: Day → DayEntity
 extension DayEntity {
-    convenience init(context: NSManagedObjectContext, day: Day) {
+    convenience init(context: NSManagedObjectContext, day: Day, goalSetEntity: GoalSetEntity?) {
         self.init(context: context)
         self.id = day.id
         self.calendarDayString = day.calendarDayString
+        self.goalSet = goalSetEntity
         self.bodyProfile = try! JSONEncoder().encode(day.bodyProfile)
         self.updatedAt = day.updatedAt
         self.syncStatus = day.syncStatus.rawValue
@@ -24,8 +25,15 @@ extension DayEntity {
 }
 
 extension DayEntity {
-    func update(with serverDay: Day, in context: NSManagedObjectContext) throws {
-        id = serverDay.id
+    func update(
+        with serverDay: Day,
+        goalSetEntity: GoalSetEntity?,
+        in context: NSManagedObjectContext
+    ) throws {
+        
+        goalSet = goalSetEntity
+        bodyProfile = try! JSONEncoder().encode(serverDay.bodyProfile)
+
         updatedAt = serverDay.updatedAt
         syncStatus = SyncStatus.synced.rawValue
     }

@@ -4,13 +4,14 @@ import CoreData
 
 //MARK: Meal → MealEntity
 extension MealEntity {
-    convenience init(context: NSManagedObjectContext, meal: Meal, dayEntity: DayEntity) {
+    convenience init(context: NSManagedObjectContext, meal: Meal, dayEntity: DayEntity, goalSetEntity: GoalSetEntity?) {
         self.init(context: context)
         self.id = meal.id
         self.day = dayEntity
         self.name = meal.name
         self.time = meal.time
         self.markedAsEatenAt = meal.markedAsEatenAt ?? 0
+        self.goalSet = goalSetEntity
         self.goalWorkoutMinutes = Int32(meal.goalWorkoutMinutes ?? 0)
         self.updatedAt = meal.updatedAt
         self.deletedAt = meal.deletedAt ?? 0
@@ -39,11 +40,13 @@ extension MealEntity {
 }
 
 extension MealEntity {
-    func update(with serverMeal: Meal, in context: NSManagedObjectContext) throws {
+    func update(with serverMeal: Meal, goalSetEntity: GoalSetEntity?, in context: NSManagedObjectContext) throws {
         id = serverMeal.id
         name = serverMeal.name
         time = serverMeal.time
         markedAsEatenAt = serverMeal.markedAsEatenAt ?? 0
+        goalSet = goalSetEntity
+        goalWorkoutMinutes = Int32(serverMeal.goalWorkoutMinutes ?? 0)
         updatedAt = serverMeal.updatedAt
         syncStatus = SyncStatus.synced.rawValue
     }

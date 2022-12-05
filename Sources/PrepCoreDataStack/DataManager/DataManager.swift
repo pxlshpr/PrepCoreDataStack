@@ -32,8 +32,13 @@ public class DataManager: ObservableObject {
         loadGoalSets()
 
         NotificationCenter.default.addObserver(
-            self, selector: #selector(serverDidUpdateFoods),
+            self, selector: #selector(didUpdateFoods),
             name: .didUpdateFoods, object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didUpdateGoalSets),
+            name: .didUpdateGoalSets, object: nil
         )
         
         //TODO: Add notification for GoalSets

@@ -19,8 +19,6 @@ extension DataManager {
             userId: userId,
             versionTimestamp: versionTimestamp
         )
-        let size = MemoryLayout.size(ofValue: form)
-        print("Sending sync form of size: \(size)")
         return form
     }
 
@@ -284,10 +282,19 @@ extension DataManager {
     }
     
     func processUpdates(_ updates: SyncForm.Updates) async throws {
-        
-        let bgContext =  coreDataManager.newBackgroundContext()
-        await bgContext.perform {
 
+        let bgContext =  coreDataManager.newBackgroundContext()
+
+        /// Our changes weren't being merged, which we discovered thanks to
+        /// [this answer](https://stackoverflow.com/a/63753917)
+        let observer = NotificationCenter.default.addObserver(
+            forName: .NSManagedObjectContextDidSave,
+            object: bgContext, queue: .main)
+        { notification in
+            self.coreDataManager.viewContext.mergeChanges(fromContextDidSave: notification)
+        }
+        
+        await bgContext.perform {
             do {
                 guard let _ = self.user else { throw SyncError.syncPerformedWithoutFetchedUser }
 
@@ -319,7 +326,9 @@ extension DataManager {
                 print("Error: \(error)")
             }
         }
-            
+        
+        NotificationCenter.default.removeObserver(observer)
+
         //TODO: For each entity in updates
         // If it doesn't exist on device,
         //     insert it
@@ -350,14 +359,44 @@ extension DataManager {
         try days.forEach { day in
             try createOrUpdateDay(day, in: context)
         }
+        
+        DispatchQueue.main.async {
+            /// Send a notification on the main thread
+            NotificationCenter.default.post(
+                name: .didUpdateDays,
+                object: nil
+            )
+        }
+
     }
     
     func createOrUpdateDay(_ serverDay: Day, in context: NSManagedObjectContext) throws {
+        
+        let goalSetEntity: GoalSetEntity?
+        if let goalSet = serverDay.goalSet {
+            guard let entity = try coreDataManager.fetchGoalSetEntity(with: goalSet.id, context: context) else {
+                throw CoreDataManagerError.missingGoalSetEntity
+            }
+            goalSetEntity = entity
+        } else {
+            goalSetEntity = nil
+        }
+        
         if let day = try coreDataManager.dayEntity(with: serverDay.id, context: context) {
             print("📝 Updating existing Day")
-            try day.update(with: serverDay, in: context)
+            try day.update(
+                with: serverDay,
+                goalSetEntity: goalSetEntity,
+                in: context
+            )
+            
         } else {
-            let dayEntity = DayEntity(context: context, day: serverDay)
+            
+            let dayEntity = DayEntity(
+                context: context,
+                day: serverDay,
+                goalSetEntity: goalSetEntity
+            )
             print("✨ Inserting Day")
             context.insert(dayEntity)
         }
@@ -412,7 +451,17 @@ extension DataManager {
             context: context
         ) {
             print("📝 Updating existing FoodItem")
-            try foodItem.update(amount: serverFoodItem.amount, markedAsEatenAt: serverFoodItem.markedAsEatenAt, foodEntity: foodEntity, mealEntity: mealEntity, sortPosition: serverFoodItem.sortPosition, in: context)
+            try foodItem.update(
+                amount: serverFoodItem.amount,
+                markedAsEatenAt: serverFoodItem.markedAsEatenAt,
+                foodEntity: foodEntity,
+                mealEntity: mealEntity,
+                sortPosition: serverFoodItem.sortPosition,
+                syncStatus: .synced,
+                updatedAt: serverFoodItem.updatedAt,
+                postNotifications: false,
+                in: context
+            )
         } else {
             print("✨ Inserting FoodItem")
             let foodItemEntity = FoodItemEntity(context: context, foodItem: serverFoodItem, foodEntity: foodEntity, mealEntity: mealEntity)
@@ -480,14 +529,35 @@ extension DataManager {
     }
     
     func createOrUpdateMeal(_ serverMeal: Meal, in context: NSManagedObjectContext) throws {
+        
+        let goalSetEntity: GoalSetEntity?
+        if let goalSet = serverMeal.goalSet {
+            guard let entity = try coreDataManager.fetchGoalSetEntity(with: goalSet.id) else {
+                throw CoreDataManagerError.missingGoalSetEntity
+            }
+            goalSetEntity = entity
+        } else {
+            goalSetEntity = nil
+        }
+        
+
         if let meal = try coreDataManager.mealEntity(with: serverMeal.id, context: context) {
             print("📝 Updating existing Meal")
-            try meal.update(with: serverMeal, in: context)
+            try meal.update(
+                with: serverMeal,
+                goalSetEntity: goalSetEntity,
+                in: context
+            )
         } else {
             guard let dayEntity = try coreDataManager.fetchDayEntity(calendarDayString: serverMeal.day.calendarDayString, context: context) else {
                 throw DataManagerError.noDayFoundWhenInsertingMealFromServer
             }
-            let mealEntity = MealEntity(context: context, meal: serverMeal, dayEntity: dayEntity)
+            let mealEntity = MealEntity(
+                context: context,
+                meal: serverMeal,
+                dayEntity: dayEntity,
+                goalSetEntity: goalSetEntity
+            )
             print("✨ Inserting Meal")
             context.insert(mealEntity)
         }

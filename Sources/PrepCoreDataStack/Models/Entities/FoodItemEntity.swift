@@ -60,6 +60,9 @@ extension FoodItemEntity {
         foodEntity: FoodEntity,
         mealEntity: MealEntity,
         sortPosition: Int,
+        syncStatus: SyncStatus,
+        updatedAt: Double = Date().timeIntervalSince1970,
+        postNotifications: Bool,
         in context: NSManagedObjectContext
     ) throws {
 //        guard let foodEntity = try foodEntity(with: mealFoodItem.food.id, context: viewContext) else {
@@ -79,19 +82,30 @@ extension FoodItemEntity {
         self.markedAsEatenAt = markedAsEatenAt ?? 0
         self.sortPosition = Int16(sortPosition)
         
-        self.syncStatus = SyncStatus.synced.rawValue
-        self.updatedAt = Date().timeIntervalSince1970
+        self.syncStatus = syncStatus.rawValue
+        
+        self.updatedAt = updatedAt
 
         try context.save()
+
+        DispatchQueue.main.async {
+            print("🤡 Updated FoodItem with \(updatedAt), syncStatus as: \(syncStatus)")
+            print("   ↪️ synced: \(DataManager.shared.numberOfFoodItems(with: .synced))")
+            print("   ↪️ notSynced: \(DataManager.shared.numberOfFoodItems(with: .notSynced))")
+            print("   ↪️ syncing: \(DataManager.shared.numberOfFoodItems(with: .syncing))")
+        }
         
-        if mealChanged {
+        /// Put this aside in case we're calling this with a background context
+        /// in which case the id (and possibly the rest of the entity) becomes nil
+        let foodItem = FoodItem(from: self)
+
+        if mealChanged, postNotifications {
             /// Send notifications for UI to handle the meal change
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 NotificationCenter.default.post(name: .didDeleteFoodItemFromMeal, object: nil, userInfo: [
-                    Notification.Keys.uuid: self.id!
+                    Notification.Keys.uuid: foodItem.id
                 ])
 //                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    let foodItem = FoodItem(from: self)
                     NotificationCenter.default.post(name: .didAddFoodItemToMeal, object: nil, userInfo: [
                         Notification.Keys.foodItem: foodItem
                     ])

@@ -55,9 +55,15 @@ public extension DataManager {
         }
     }
     
-    @objc func serverDidUpdateFoods(notification: Notification) {
+    @objc func didUpdateFoods(notification: Notification) {
         DispatchQueue.main.async {
             self.loadMyFoods()
+        }
+    }
+
+    @objc func didUpdateGoalSets(notification: Notification) {
+        DispatchQueue.main.async {
+            self.loadGoalSets()
         }
     }
 
