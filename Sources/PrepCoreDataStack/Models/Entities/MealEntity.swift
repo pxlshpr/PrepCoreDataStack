@@ -74,7 +74,8 @@ extension MealFoodItem {
             food: Food(from: entity.food!),
             amount: try! JSONDecoder().decode(FoodValue.self, from: entity.amount!),
             markedAsEatenAt: entity.markedAsEatenAt,
-            sortPosition: Int(entity.sortPosition)
+            sortPosition: Int(entity.sortPosition),
+            isSoftDeleted: entity.deletedAt > 0
         )
     }
 }
