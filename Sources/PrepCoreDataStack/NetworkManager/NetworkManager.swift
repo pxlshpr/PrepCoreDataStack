@@ -7,10 +7,14 @@ public class NetworkManager {
     
     public enum Endpoint {
         case sync
+        case backup
+        
         var path: String {
             switch self {
             case .sync:
                 return "sync"
+            case .backup:
+                return "backup"
             }
         }
     }
@@ -46,7 +50,7 @@ public class NetworkManager {
         } catch {
             throw NetworkManagerError.couldNotConnectToServer
         }
-    }
+    }    
 }
 
 enum NetworkManagerError: Error {
