@@ -569,12 +569,13 @@ extension DataManager {
             )
             
             let dayMeal = DayMeal(from: meal)
-            NotificationCenter.default.post(
-                name: .didUpdateMeal,
-                object: nil,
-                userInfo: [Notification.Keys.dayMeal: dayMeal]
-            )
-
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(
+                    name: .didUpdateMeal,
+                    object: nil,
+                    userInfo: [Notification.Keys.dayMeal: dayMeal]
+                )
+            }
             
         } else {
             
