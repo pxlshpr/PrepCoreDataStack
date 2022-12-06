@@ -476,6 +476,19 @@ extension DataManager {
                 postNotifications: false,
                 in: context
             )
+            
+//            let updatedFoodItem = FoodItem(from: foodItem)
+//
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+//                NotificationCenter.default.post(
+//                    name: .didUpdateMealFoodItem,
+//                    object: nil,
+//                    userInfo: [
+//                        Notification.Keys.foodItem: updatedFoodItem
+//                    ]
+//                )
+//            }
+            
         } else {
             print("✨ Inserting FoodItem")
             let foodItemEntity = FoodItemEntity(context: context, foodItem: serverFoodItem, foodEntity: foodEntity, mealEntity: mealEntity)

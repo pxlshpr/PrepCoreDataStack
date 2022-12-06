@@ -39,6 +39,24 @@ public extension DataManager {
         }
     }
     
+    func toggleCompletion(for mealFoodItem: MealFoodItem) throws {
+        let updatedFoodItemEntity = try coreDataManager.toggleCompletion(
+            for: mealFoodItem
+        )
+        
+        let updatedFoodItem = FoodItem(from: updatedFoodItemEntity)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(
+                name: .didUpdateMealFoodItem,
+                object: nil,
+                userInfo: [
+                    Notification.Keys.foodItem: updatedFoodItem
+                ]
+            )
+        }
+    }
+    
     func updateMealItem(
         _ mealFoodItem: MealFoodItem,
         dayMeal: DayMeal,

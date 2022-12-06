@@ -87,7 +87,15 @@ extension CoreDataManager {
         
         return foodItemEntity
     }
+     
+    func toggleCompletion(for mealFoodItem: MealFoodItem) throws -> FoodItemEntity {
         
+        guard let foodItemEntity = try foodItemEntity(with: mealFoodItem.id) else {
+            throw CoreDataManagerError.missingFoodItem
+        }
+        try foodItemEntity.toggleCompletion(in: viewContext)
+        return foodItemEntity
+    }
     func updateSortPosition(for mealFoodItem: MealFoodItem) throws {
         
         guard let foodItemEntity = try foodItemEntity(with: mealFoodItem.id, context: viewContext) else {

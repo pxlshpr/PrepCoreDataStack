@@ -54,6 +54,17 @@ extension FoodItemEntity {
 }
 
 extension FoodItemEntity {
+    func toggleCompletion(in context: NSManagedObjectContext) throws {
+        if markedAsEatenAt == 0 {
+            self.markedAsEatenAt = Date().timeIntervalSince1970
+        } else {
+            self.markedAsEatenAt = 0
+        }
+        self.syncStatus = Int16(SyncStatus.notSynced.rawValue)
+        self.updatedAt = Date().timeIntervalSince1970
+        try context.save()
+    }
+    
     func update(
         amount: FoodValue,
         markedAsEatenAt: Double?,
@@ -66,14 +77,6 @@ extension FoodItemEntity {
         postNotifications: Bool,
         in context: NSManagedObjectContext
     ) throws {
-//        guard let foodEntity = try foodEntity(with: mealFoodItem.food.id, context: viewContext) else {
-//            throw CoreDataManagerError.missingFood
-//        }
-//
-//        guard let mealEntity = try mealEntity(with: mealId, context: viewContext) else {
-//            throw CoreDataManagerError.missingMeal
-//        }
-        
         let mealChanged = self.meal?.id != mealEntity.id
 
         self.food = foodEntity
@@ -90,13 +93,6 @@ extension FoodItemEntity {
 
         try context.save()
 
-        DispatchQueue.main.async {
-            print("🤡 Updated FoodItem with \(updatedAt), syncStatus as: \(syncStatus)")
-            print("   ↪️ synced: \(DataManager.shared.numberOfFoodItems(with: .synced))")
-            print("   ↪️ notSynced: \(DataManager.shared.numberOfFoodItems(with: .notSynced))")
-            print("   ↪️ syncing: \(DataManager.shared.numberOfFoodItems(with: .syncing))")
-        }
-        
         /// Put this aside in case we're calling this with a background context
         /// in which case the id (and possibly the rest of the entity) becomes nil
         let foodItem = FoodItem(from: self)
