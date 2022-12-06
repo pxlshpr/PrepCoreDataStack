@@ -121,7 +121,8 @@ extension CoreDataManager {
 }
 
 extension CoreDataManager {
-    func mealEntity(with id: UUID, context: NSManagedObjectContext) throws -> MealEntity? {
+    func mealEntity(with id: UUID, context: NSManagedObjectContext? = nil) throws -> MealEntity? {
+        let context = context ?? viewContext
         let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
         request.predicate = NSPredicate(format: "id == %@", id.uuidString)
         return try context.fetch(request).first

@@ -3,6 +3,7 @@ import PrepDataTypes
 
 extension CoreDataManager {
  
+    
     /// Returns a newly created `MealEntity` after creating and linking a newly created `DayEntity` if needed
     func createAndSaveMealEntity(
         named name: String,
@@ -32,6 +33,38 @@ extension CoreDataManager {
             goalSetEntity: goalSetEntity
         )
         self.viewContext.insert(mealEntity)
+        try self.viewContext.save()
+        return mealEntity
+    }
+    
+    func updateMealEntity(
+        withId id: UUID,
+        name: String,
+        time: Date,
+        goalSet: GoalSet?
+    ) throws -> MealEntity {
+        
+        guard let mealEntity = try mealEntity(with: id) else {
+            throw DataManagerError.mealNotFound
+        }
+        
+        let goalSetEntity: GoalSetEntity?
+        if let goalSet {
+            guard let entity = try fetchGoalSetEntity(with: goalSet.id, context: viewContext) else {
+                throw CoreDataManagerError.missingGoalSetEntity
+            }
+            goalSetEntity = entity
+        } else {
+            goalSetEntity = nil
+        }
+        
+        mealEntity.name = name
+        mealEntity.time = time.timeIntervalSince1970
+        mealEntity.goalSet = goalSetEntity
+        
+        mealEntity.syncStatus = Int16(SyncStatus.notSynced.rawValue)
+        mealEntity.updatedAt = Date().timeIntervalSince1970
+
         try self.viewContext.save()
         return mealEntity
     }

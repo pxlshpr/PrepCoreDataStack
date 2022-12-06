@@ -90,4 +90,28 @@ public extension DataManager {
             )
         }
     }
+    
+    func updateMeal(
+        _ dayMeal: DayMeal,
+        withName name: String,
+        time: Date,
+        goalSet: GoalSet?
+    ) throws -> Meal {
+        
+        let mealEntity = try coreDataManager.updateMealEntity(
+            withId: dayMeal.id,
+            name: name,
+            time: time,
+            goalSet: goalSet
+        )
+
+        let meal = Meal(from: mealEntity)
+        NotificationCenter.default.post(
+            name: .didUpdateMeal,
+            object: nil,
+            userInfo: [Notification.Keys.meal: meal]
+        )
+        
+        return meal
+    }
 }
