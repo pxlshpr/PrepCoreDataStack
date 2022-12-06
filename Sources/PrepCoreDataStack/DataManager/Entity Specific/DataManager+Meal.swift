@@ -63,9 +63,7 @@ public extension DataManager {
             for: user.id
         )
 
-        /// Send a notification named`didAddMeal` with the new `Meal`
         let meal = Meal(from: mealEntity)
-        
         NotificationCenter.default.post(
             name: .didAddMeal,
             object: nil,
@@ -73,7 +71,6 @@ public extension DataManager {
                 Notification.Keys.meal: meal
             ]
         )
-        
         return meal
     }
     
@@ -96,7 +93,7 @@ public extension DataManager {
         withName name: String,
         time: Date,
         goalSet: GoalSet?
-    ) throws -> Meal {
+    ) throws {
         
         let mealEntity = try coreDataManager.updateMealEntity(
             withId: dayMeal.id,
@@ -105,13 +102,11 @@ public extension DataManager {
             goalSet: goalSet
         )
 
-        let meal = Meal(from: mealEntity)
+        let dayMeal = DayMeal(from: mealEntity)
         NotificationCenter.default.post(
             name: .didUpdateMeal,
             object: nil,
-            userInfo: [Notification.Keys.meal: meal]
+            userInfo: [Notification.Keys.dayMeal: dayMeal]
         )
-        
-        return meal
     }
 }
