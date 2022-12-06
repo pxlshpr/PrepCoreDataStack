@@ -568,6 +568,14 @@ extension DataManager {
                 in: context
             )
             
+            let dayMeal = DayMeal(from: meal)
+            NotificationCenter.default.post(
+                name: .didUpdateMeal,
+                object: nil,
+                userInfo: [Notification.Keys.dayMeal: dayMeal]
+            )
+
+            
         } else {
             
             guard let dayEntity = try coreDataManager.fetchDayEntity(
