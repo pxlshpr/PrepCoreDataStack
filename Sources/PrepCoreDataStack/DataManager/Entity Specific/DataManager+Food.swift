@@ -62,7 +62,7 @@ public extension DataManager {
         }
         fastingTimerState = FastingTimerState(
             lastMealTime: lastMealTime,
-            nextMealTime: nextMealTime
+            nextMeal: nextMeal
         )
     }
     
@@ -79,13 +79,13 @@ public extension DataManager {
         }
     }
     
-    var nextMealTime: Date? {
+    var nextMeal: DayMeal? {
         do {
-            guard let meal = try coreDataManager.earliestMealAfterNow() else {
+            guard let mealEntity = try coreDataManager.earliestMealAfterNow() else {
                 return nil
             }
-            print("Next Meal: \(meal.name!) at \(meal.time)")
-            return Date(timeIntervalSince1970: meal.time)
+            print("Next Meal: \(mealEntity.name!) at \(mealEntity.time)")
+            return DayMeal(from: mealEntity)
         } catch {
             print("Error getting next meal: \(error)")
             return nil

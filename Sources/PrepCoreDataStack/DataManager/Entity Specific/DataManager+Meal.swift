@@ -128,13 +128,3 @@ extension DataManager {
         updateFastingTimer()
     }
 }
-
-import SwiftUI
-
-extension DataManager {
-    func updateFastingTimer() {
-        withAnimation {
-            loadFastingTimerState()
-        }
-    }
-}

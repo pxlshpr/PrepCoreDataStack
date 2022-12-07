@@ -65,3 +65,13 @@ public class DataManager: ObservableObject {
         )
     }
 }
+
+import SwiftUI
+
+extension DataManager {
+    func updateFastingTimer() {
+        withAnimation {
+            loadFastingTimerState()
+        }
+    }
+}
