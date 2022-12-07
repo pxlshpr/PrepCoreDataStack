@@ -53,7 +53,16 @@ extension DataManager {
                 
                 var foodItems: [FoodItem]? = nil
                 if let foodItemEntities = updatedEntities.foodItemEntities {
-                    foodItems = foodItemEntities.map { FoodItem(from: $0) }
+                    let items = foodItemEntities.map { FoodItem(from: $0) }
+                    foodItems = items
+                    if items.count > 0 {
+                        print("🔀🌈 Sending updated foodItems:")
+                        print("🔀🌈 " + items
+                            .sorted(by: { $0.sortPosition < $1.sortPosition})
+                            .map({ "\($0.sortPosition)-\($0.food.name)" })
+                            .joined(separator: ", ")
+                        )
+                    }
                 }
 
                 var goalSets: [GoalSet]? = nil

@@ -3,7 +3,7 @@ import PrepDataTypes
 
 public extension DataManager {
     
-    func deleteMealItem(_ mealFoodItem: MealFoodItem) throws {
+    func deleteMealItem(_ mealFoodItem: MealFoodItem, in dayMeal: DayMeal) throws {
         try coreDataManager.softDeleteMealItem(mealFoodItem)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {

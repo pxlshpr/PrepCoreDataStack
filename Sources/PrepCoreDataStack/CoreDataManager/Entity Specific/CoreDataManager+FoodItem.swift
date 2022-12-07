@@ -102,6 +102,8 @@ extension CoreDataManager {
             throw CoreDataManagerError.missingFoodItem
         }
         
+//        print("🔀 Updating sort position of \(mealFoodItem.food.name) to \(mealFoodItem.sortPosition)")
+        
         foodItemEntity.sortPosition = Int16(mealFoodItem.sortPosition)
         foodItemEntity.syncStatus = SyncStatus.notSynced.rawValue
         foodItemEntity.updatedAt = Date().timeIntervalSince1970

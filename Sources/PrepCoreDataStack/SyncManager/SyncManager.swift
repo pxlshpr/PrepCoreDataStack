@@ -5,16 +5,28 @@ let SyncInterval: Double = 5
 
 public class SyncManager {
     
-    let networkManager = NetworkManager.local
+    let networkManager = NetworkManager.server
     let dataManager = DataManager.shared
 
     public static let shared = SyncManager()
+    
+    public var isPaused: Bool = false
+    
     var timer = Timer()
 
     public func startMonitoring() {
         performSync()
         scheduledTimer()
     }
+        
+    public func pause() {
+        isPaused = true
+    }
+    public func resume() {
+        isPaused = false
+    }
+    
+    //MARK: - Private
     
     func scheduledTimer() {
         DispatchQueue.global(qos: .utility).async {
@@ -30,8 +42,12 @@ public class SyncManager {
             RunLoop.current.run()
         }
     }
-    
     @objc func performSync() {
+        guard !isPaused else {
+            print("⚠️ Sync is currently paused")
+            return
+        }
+
         Task {
             do {
                 
