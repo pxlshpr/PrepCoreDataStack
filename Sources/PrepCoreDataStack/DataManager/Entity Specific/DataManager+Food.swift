@@ -55,6 +55,43 @@ public extension DataManager {
         }
     }
     
+    func loadFastingTimerState() {
+        guard let lastMealTime else {
+            fastingTimerState = nil
+            return
+        }
+        fastingTimerState = FastingTimerState(
+            lastMealTime: lastMealTime,
+            nextMealTime: nextMealTime
+        )
+    }
+    
+    var lastMealTime: Date? {
+        do {
+            guard let meal = try coreDataManager.latestMealBeforeNow() else {
+                return nil
+            }
+            print("Last Meal: \(meal.name!) at \(meal.time)")
+            return Date(timeIntervalSince1970: meal.time)
+        } catch {
+            print("Error getting last meal: \(error)")
+            return nil
+        }
+    }
+    
+    var nextMealTime: Date? {
+        do {
+            guard let meal = try coreDataManager.earliestMealAfterNow() else {
+                return nil
+            }
+            print("Next Meal: \(meal.name!) at \(meal.time)")
+            return Date(timeIntervalSince1970: meal.time)
+        } catch {
+            print("Error getting next meal: \(error)")
+            return nil
+        }
+    }
+    
     @objc func didUpdateFoods(notification: Notification) {
         DispatchQueue.main.async {
             self.loadMyFoods()

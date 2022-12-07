@@ -15,6 +15,8 @@ public class DataManager: ObservableObject {
     //TODO: We need to mitigate situations where this might be extremely large
     @Published var myFoods: [Food] = []
 
+    @Published public var fastingTimerState: FastingTimerState? = nil
+    
     convenience init() {
         self.init(coreDataManager: CoreDataManager())
         coreDataManager.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
@@ -30,6 +32,7 @@ public class DataManager: ObservableObject {
         
         loadMyFoods()
         loadGoalSets()
+        loadFastingTimerState()
 
         NotificationCenter.default.addObserver(
             self, selector: #selector(didUpdateFoods),
@@ -40,7 +43,25 @@ public class DataManager: ObservableObject {
             self, selector: #selector(didUpdateGoalSets),
             name: .didUpdateGoalSets, object: nil
         )
-        
-        //TODO: Add notification for GoalSets
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didAddMeal),
+            name: .didAddMeal, object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didDeleteMeal),
+            name: .didDeleteMeal, object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didUpdateMeals),
+            name: .didUpdateMeals, object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didUpdateMeal),
+            name: .didUpdateMeal, object: nil
+        )
     }
 }

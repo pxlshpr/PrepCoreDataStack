@@ -110,3 +110,31 @@ public extension DataManager {
         )
     }
 }
+
+extension DataManager {
+    @objc func didAddMeal(notification: Notification) {
+        updateFastingTimer()
+    }
+
+    @objc func didDeleteMeal(notification: Notification) {
+        updateFastingTimer()
+    }
+
+    @objc func didUpdateMeal(notification: Notification) {
+        updateFastingTimer()
+    }
+
+    @objc func didUpdateMeals(notification: Notification) {
+        updateFastingTimer()
+    }
+}
+
+import SwiftUI
+
+extension DataManager {
+    func updateFastingTimer() {
+        withAnimation {
+            loadFastingTimerState()
+        }
+    }
+}

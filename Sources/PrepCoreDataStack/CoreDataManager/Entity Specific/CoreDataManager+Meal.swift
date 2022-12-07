@@ -1,5 +1,6 @@
 import Foundation
 import PrepDataTypes
+import CoreData
 
 extension CoreDataManager {
  
@@ -102,5 +103,30 @@ extension CoreDataManager {
         mealEntity.syncStatus = Int16(SyncStatus.notSynced.rawValue)
         
         try self.viewContext.save()
+    }
+}
+
+extension CoreDataManager {
+    func latestMealBeforeNow() throws -> MealEntity? {
+        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+        request.predicate = NSPredicate(
+//            format: "(time < %f) AND (ANY foodItems.markedAsEatenAt > 0)", Date().timeIntervalSince1970
+            format: "time < %f AND deletedAt == 0", Date().timeIntervalSince1970
+        )
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \MealEntity.time, ascending: false),
+        ]
+        return try viewContext.fetch(request).first
+    }
+    
+    func earliestMealAfterNow() throws -> MealEntity? {
+        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+        request.predicate = NSPredicate(
+            format: "time > %f AND deletedAt == 0", Date().timeIntervalSince1970
+        )
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \MealEntity.time, ascending: true),
+        ]
+        return try viewContext.fetch(request).first
     }
 }
