@@ -155,7 +155,32 @@ extension CoreDataManager {
         context.delete(entity)
         try context.save()
     }
+}
 
+extension CoreDataManager {
+    
+    func fastingActivityEntity(with id: UUID, context: NSManagedObjectContext? = nil) throws -> FastingActivityEntity? {
+        let context = context ?? self.viewContext
+        let request = NSFetchRequest<FastingActivityEntity>(entityName: "FastingActivityEntity")
+        request.predicate = NSPredicate(format: "id == %@", id.uuidString)
+        return try context.fetch(request).first
+    }
+
+    func currentFastingActivityEntity(context: NSManagedObjectContext? = nil) throws -> FastingActivityEntity? {
+        let context = context ?? self.viewContext
+        let request = NSFetchRequest<FastingActivityEntity>(entityName: "FastingActivityEntity")
+        request.predicate = NSPredicate(format: "deletedAt == 0")
+        return try context.fetch(request).first
+    }
+
+    func hardDeleteFastingActivityEntity(with id: UUID, context: NSManagedObjectContext) throws {
+        guard let entity = try fastingActivityEntity(with: id, context: context) else {
+            /// It's already been deleted
+            return
+        }
+        context.delete(entity)
+        try context.save()
+    }
 }
 
 extension CoreDataManager {
@@ -207,13 +232,18 @@ extension CoreDataManager {
                 goalSetsRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
                 let goalSetEntities = try bgContext.fetch(goalSetsRequest)
 
+                let fastingActivitiesRequest = NSFetchRequest<FastingActivityEntity>(entityName: "FastingActivityEntity")
+                fastingActivitiesRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
+                let fastingActivityEntities = try bgContext.fetch(fastingActivitiesRequest)
+
                 let updatedEntites = UpdatedEntities(
                     userEntity: userEntity,
                     dayEntities: dayEntities,
                     mealEntities: mealEntities,
                     foodEntities: foodEntities,
                     foodItemEntities: foodItemEntities,
-                    goalSetEntities: goalSetEntities
+                    goalSetEntities: goalSetEntities,
+                    fastingActivityEntities: fastingActivityEntities
                 )
                 
                 completion(updatedEntites)
@@ -231,4 +261,5 @@ struct UpdatedEntities {
     let foodEntities: [FoodEntity]?
     let foodItemEntities: [FoodItemEntity]?
     let goalSetEntities: [GoalSetEntity]?
+    let fastingActivityEntities: [FastingActivityEntity]?
 }

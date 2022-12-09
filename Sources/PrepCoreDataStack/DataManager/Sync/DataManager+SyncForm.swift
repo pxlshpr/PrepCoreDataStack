@@ -53,21 +53,17 @@ extension DataManager {
                 
                 var foodItems: [FoodItem]? = nil
                 if let foodItemEntities = updatedEntities.foodItemEntities {
-                    let items = foodItemEntities.map { FoodItem(from: $0) }
-                    foodItems = items
-                    if items.count > 0 {
-                        print("🔀🌈 Sending updated foodItems:")
-                        print("🔀🌈 " + items
-                            .sorted(by: { $0.sortPosition < $1.sortPosition})
-                            .map({ "\($0.sortPosition)-\($0.food.name)" })
-                            .joined(separator: ", ")
-                        )
-                    }
+                    foodItems = foodItemEntities.map { FoodItem(from: $0) }
                 }
 
                 var goalSets: [GoalSet]? = nil
                 if let goalSetEntities = updatedEntities.goalSetEntities {
                     goalSets = goalSetEntities.map { GoalSet(from: $0) }
+                }
+                
+                var fastingActivites: [FastingActivity]? = nil
+                if let fastingActivityEntities = updatedEntities.fastingActivityEntities {
+                    fastingActivites = fastingActivityEntities.map { FastingActivity(from: $0) }
                 }
 
                 let updated = SyncForm.Updates(
@@ -76,7 +72,8 @@ extension DataManager {
                     foods: foods,
                     foodItems: foodItems,
                     goalSets: goalSets,
-                    meals: meals
+                    meals: meals,
+                    fastingActivities: fastingActivites
                 )
 
                 continuation.resume(returning: updated)
@@ -330,6 +327,10 @@ extension DataManager {
                     try self.createOrUpdateFoodItems(foodItems, in: bgContext)
                 }
                 
+                if let fastingActivities = updates.fastingActivities, !fastingActivities.isEmpty {
+                    try self.updateFastingActivities(fastingActivities, in: bgContext)
+                }
+                
             } catch {
                 print("Error: \(error)")
             }
@@ -505,6 +506,36 @@ extension DataManager {
         }
 
         try context.save()
+    }
+    
+    //MARK: - FastingActivity
+    func updateFastingActivities(_ fastingActivities: [FastingActivity], in context: NSManagedObjectContext) throws {
+        try fastingActivities.forEach { fastingActivity in
+            try updateFastingActivity(fastingActivity, in: context)
+        }
+    }
+    
+    func updateFastingActivity(
+        _ serverFastingActivity: FastingActivity,
+        in context: NSManagedObjectContext
+    ) throws {
+        
+        guard let entity = try coreDataManager.fastingActivityEntity(
+            with: serverFastingActivity.id,
+            context: context
+        ) else {
+            return
+        }
+
+        if let deletedAt = serverFastingActivity.deletedAt, deletedAt > 0 {
+            /// We're only concerned about deleting `FastingActivity` objects created on this device
+            try coreDataManager.hardDeleteFastingActivityEntity(with: serverFastingActivity.id, context: context)
+            print("🗑 (Hard) Deleted FastingActivity")
+        } else {
+            entity.update(with: serverFastingActivity, context: context)
+            try context.save()
+        }
+
     }
     
     //MARK: - GoalSets

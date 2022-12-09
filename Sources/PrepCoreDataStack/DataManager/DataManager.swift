@@ -74,6 +74,7 @@ extension DataManager {
     func updateFastingTimer() {
         withAnimation {
             loadFastingTimerState()
+            updateFastingActivity()
         }
     }
 }

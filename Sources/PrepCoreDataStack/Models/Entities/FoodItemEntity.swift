@@ -91,6 +91,7 @@ extension FoodItemEntity {
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt ?? 0
 
+        //TODO: Look into this being a double save when called from SyncFrom processing (we already have one there at the end of the func)
         try context.save()
 
         /// Put this aside in case we're calling this with a background context

@@ -139,34 +139,69 @@ extension DataManager {
             lastMealTime: lastMealTime,
             nextMeal: nextMeal
         )
-//        /// Send this to the server
-//        sendFastingTimerForm()
     }
     
-    public func sendFastingTimerForm() {
-        Task {
-            guard let fastingTimerForm else { return }
-            try await postFastingTimerForm(fastingTimerForm)
+    public func deleteFastingActivityEntity() {
+        do {
+            guard let entity = try coreDataManager.currentFastingActivityEntity() else {
+                print("We don't have an entity")
+                return
+            }
+            try coreDataManager.softDeleteFastingActivityEntity(entity)
+        } catch {
+            print("Error deleting fasting activity: \(error)")
         }
     }
     
-    func postFastingTimerForm(_ form: FastingTimerForm) async throws {
-        let _ = try await networkManager.post(form, to: .fastingTimer)
-    }
-    
-    var fastingTimerForm: FastingTimerForm? {
-        guard
-            let user,
-            let pushToken = UserDefaults.standard.string(forKey: UserDefaultsKeys.fastingTimerPushToken),
-            !pushToken.isEmpty
-        else {
-            return nil
-        }
+    public func updateFastingPushToken(_ pushToken: String) throws {
         
-        return FastingTimerForm(
-            fastingTimerState: fastingTimerState,
-            userId: user.id,
-            pushToken: pushToken
-        )
+        UserDefaults.standard.set(pushToken, forKey: UserDefaultsKeys.fastingTimerPushToken)
+        
+        if let entity = try coreDataManager.currentFastingActivityEntity() {
+            print("We already have a currentFastingActivityEntity")
+            
+            guard entity.pushToken! == pushToken else {
+                print("Tokens do not match, soft deleting the current one")
+                try coreDataManager.softDeleteFastingActivityEntity(entity)
+                
+                updateFastingActivity()
+                return
+            }
+            
+            print("Tokens match, updating fasting activity")
+            updateFastingActivity()
+            
+        } else {
+            guard let fastingTimerState else {
+                print("⚠️ Got a new push token without a fasting timer state")
+                return
+            }
+            let _ = try coreDataManager.createFastingActivityEntity(with: fastingTimerState, pushToken: pushToken)
+        }
+    }
+    
+    public func updateFastingActivity() {
+        do {
+            guard
+                let fastingTimerState,
+                let pushToken = UserDefaults.standard.string(forKey: UserDefaultsKeys.fastingTimerPushToken)
+            else {
+                print("⚠️ updateFastingTimerActivity without fastingTimerState or pushToken")
+                return
+            }
+            
+            if let entity = try coreDataManager.currentFastingActivityEntity() {
+                guard entity.pushToken! == pushToken else {
+                    fatalError("New pushToken wasn't saved")
+                }
+                print("Updating existing FastingActivity")
+                try coreDataManager.updateFastingActivityEntity(entity, with: fastingTimerState)
+            } else {
+                print("Creating a new FastingActivity")
+                let _ = try coreDataManager.createFastingActivityEntity(with: fastingTimerState, pushToken: pushToken)
+            }
+        } catch {
+            print("Error updating FastingActivity: \(error)")
+        }
     }
 }

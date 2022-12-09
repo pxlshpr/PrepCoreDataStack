@@ -120,4 +120,22 @@ extension CoreDataManager {
         
         try self.viewContext.save()
     }
+    
+    func softDeleteFastingActivityEntity(_ entity: FastingActivityEntity) throws {
+        entity.deletedAt = Date().timeIntervalSince1970
+        entity.syncStatus = Int16(SyncStatus.notSynced.rawValue)
+        try self.viewContext.save()
+    }
+    
+    func createFastingActivityEntity(with fastingTimerState: FastingTimerState, pushToken: String) throws -> FastingActivityEntity {
+        let fastingActivity = FastingActivity(fastingTimerState: fastingTimerState, pushToken: pushToken)
+        let entity = FastingActivityEntity(context: viewContext, fastingActivity: fastingActivity)
+        self.viewContext.insert(entity)
+        return entity
+    }
+    
+    func updateFastingActivityEntity(_ entity: FastingActivityEntity, with fastingTimerState: FastingTimerState) throws {
+        entity.update(with: fastingTimerState)
+        try self.viewContext.save()
+    }
 }

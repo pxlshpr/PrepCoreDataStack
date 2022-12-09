@@ -39,4 +39,5 @@ enum CoreDataManagerError: Error {
     case missingFood
     case missingMeal
     case missingFoodItem
+    case missingFastingActivity
 }
