@@ -8,6 +8,7 @@ public class NetworkManager {
     public enum Endpoint {
         case sync
         case backup
+        case fastingTimer
         
         var path: String {
             switch self {
@@ -15,6 +16,8 @@ public class NetworkManager {
                 return "sync"
             case .backup:
                 return "backup"
+            case .fastingTimer:
+                return "fastingTimer"
             }
         }
     }

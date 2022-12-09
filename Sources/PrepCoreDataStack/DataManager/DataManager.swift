@@ -3,7 +3,9 @@ import CoreData
 import PrepDataTypes
 
 public class DataManager: ObservableObject {
-    
+
+    let networkManager = NetworkManager.server
+
     public static let shared = DataManager()
     let coreDataManager: CoreDataManager
     @Published internal(set) public var user: User? = nil

@@ -55,17 +55,6 @@ public extension DataManager {
         }
     }
     
-    func loadFastingTimerState() {
-        guard let lastMealTime else {
-            fastingTimerState = nil
-            return
-        }
-        fastingTimerState = FastingTimerState(
-            lastMealTime: lastMealTime,
-            nextMeal: nextMeal
-        )
-    }
-    
     var lastMealTime: Date? {
         do {
             guard let meal = try coreDataManager.latestMealBeforeNow() else {
@@ -137,5 +126,47 @@ public func writeEncodableToJSON(_ encodable: Encodable, type: String) {
         } catch {
             print("Error writing: \(error)")
         }
+    }
+}
+
+extension DataManager {
+    func loadFastingTimerState() {
+        guard let lastMealTime else {
+            fastingTimerState = nil
+            return
+        }
+        fastingTimerState = FastingTimerState(
+            lastMealTime: lastMealTime,
+            nextMeal: nextMeal
+        )
+//        /// Send this to the server
+//        sendFastingTimerForm()
+    }
+    
+    public func sendFastingTimerForm() {
+        Task {
+            guard let fastingTimerForm else { return }
+            try await postFastingTimerForm(fastingTimerForm)
+        }
+    }
+    
+    func postFastingTimerForm(_ form: FastingTimerForm) async throws {
+        let _ = try await networkManager.post(form, to: .fastingTimer)
+    }
+    
+    var fastingTimerForm: FastingTimerForm? {
+        guard
+            let user,
+            let pushToken = UserDefaults.standard.string(forKey: UserDefaultsKeys.fastingTimerPushToken),
+            !pushToken.isEmpty
+        else {
+            return nil
+        }
+        
+        return FastingTimerForm(
+            fastingTimerState: fastingTimerState,
+            userId: user.id,
+            pushToken: pushToken
+        )
     }
 }
