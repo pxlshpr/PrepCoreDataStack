@@ -1,6 +1,7 @@
 import Foundation
 import PrepDataTypes
 import CoreData
+import UIKit
 
 extension DataManager {
 
