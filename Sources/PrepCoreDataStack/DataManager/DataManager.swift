@@ -4,7 +4,7 @@ import PrepDataTypes
 
 public class DataManager: ObservableObject {
 
-    let networkManager = NetworkManager.server
+    let networkManager = NetworkManager.local
 
     public static let shared = DataManager()
     let coreDataManager: CoreDataManager
