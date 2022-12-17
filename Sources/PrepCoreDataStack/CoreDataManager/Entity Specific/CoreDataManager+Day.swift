@@ -35,6 +35,33 @@ extension CoreDataManager {
     }
 }
 
+extension DataManager {
+    public func badgeWidth(forFoodItemWithId id: UUID, completion: @escaping ((CGFloat) -> ())) {
+        coreDataManager.badgeWidth(forFoodItemWithId: id, completion: completion)
+    }
+}
+
+extension CoreDataManager {
+    func badgeWidth(forFoodItemWithId id: UUID, completion: @escaping ((CGFloat) -> ())) {
+        Task {
+            let bgContext =  newBackgroundContext()
+            await bgContext.perform {
+
+                do {
+                    guard let foodItem = try self.foodItemEntity(with: id, context: bgContext) else {
+                        fatalError("Couldn't find food item with id: \(id)")
+                    }
+                    
+                    completion(foodItem.macrosIndicatorWidth)
+                } catch {
+                    print("Error: \(error)")
+                    completion(0)
+                }
+            }
+        }
+    }
+}
+
 extension CoreDataManager {
 
     func dayEntity(for date: Date, completion: @escaping ((DayEntity?) -> ())) throws {

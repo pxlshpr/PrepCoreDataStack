@@ -7,13 +7,20 @@ extension DataManager: SearchDataProvider {
         switch scope {
         case .backend:
             return try await getBackendFoods(for: searchText)
-        case .verified, .datasets:
+        case .datasets:
+            try await sleepTask(Double.random(in: 1...3))
+            return ([], false)
+        case .verified:
             try await sleepTask(Double.random(in: 1...3))
             return ([], false)
         }
     }
     
     public var recentFoods: [Food] {
-        myFoods
+        Array(
+            myFoods
+                .sorted(by: { $0.updatedAt > $1.updatedAt })
+                .prefix(5)
+        )
     }    
 }

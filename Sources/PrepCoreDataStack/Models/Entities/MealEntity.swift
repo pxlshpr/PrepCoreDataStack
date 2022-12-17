@@ -75,7 +75,9 @@ extension MealFoodItem {
             amount: try! JSONDecoder().decode(FoodValue.self, from: entity.amount!),
             markedAsEatenAt: entity.markedAsEatenAt,
             sortPosition: Int(entity.sortPosition),
-            isSoftDeleted: entity.deletedAt > 0
+            isSoftDeleted: entity.deletedAt > 0,
+//            macrosIndicatorWidth: entity.macrosIndicatorWidth
+            macrosIndicatorWidth: 0
         )
     }
 }

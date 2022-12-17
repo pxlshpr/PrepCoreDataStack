@@ -407,7 +407,7 @@ extension DataManager {
                 day: serverDay,
                 goalSetEntity: goalSetEntity
             )
-            print("✨ Inserting Day")
+            print("✨ Inserting Day: \(serverDay.calendarDayString)")
             context.insert(dayEntity)
         }
         
