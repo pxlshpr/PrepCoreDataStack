@@ -36,18 +36,13 @@ extension CoreDataManager {
 }
 
 extension DataManager {
-    public func badgeWidth(forFoodItemWithId id: UUID, completion: @escaping ((CGFloat) -> ())) {
-        coreDataManager.badgeWidth(forFoodItemWithId: id, completion: completion)
+    public func badgeWidths(on date: Date, completion: @escaping (([UUID : CGFloat]) -> ())) {
+        coreDataManager.badgeWidths(on: date, completion: completion)
     }
-    
-    public func badgeWidths(for date: Date, completion: @escaping (([UUID : CGFloat]) -> ())) {
-        coreDataManager.badgeWidths(for: date, completion: completion)
-    }
-
 }
 
 extension CoreDataManager {
-    public func badgeWidths(for date: Date, completion: @escaping (([UUID : CGFloat]) -> ())) {
+    public func badgeWidths(on date: Date, completion: @escaping (([UUID : CGFloat]) -> ())) {
         Task {
             let bgContext = newBackgroundContext()
             await bgContext.perform {
@@ -60,8 +55,13 @@ extension CoreDataManager {
                     }
                     
                     for mealEntity in dayEntity.mealEntities {
+                        
+                        /// Add `badgeWidth` for meal itself
+                        badgeWidths[mealEntity.id!] = mealEntity.badgeWidth
+                        
+                        /// Add `badgeWidth` for all food items
                         for foodItemEntity in mealEntity.nonDeletedFoodItemEntities {
-                            badgeWidths[foodItemEntity.id!] = foodItemEntity.macrosIndicatorWidth
+                            badgeWidths[foodItemEntity.id!] = foodItemEntity.badgeWidth
                         }
                     }
                     
@@ -70,26 +70,6 @@ extension CoreDataManager {
                 } catch {
                     print("Error: \(error)")
                     completion([:])
-                }
-            }
-        }
-    }
-
-    func badgeWidth(forFoodItemWithId id: UUID, completion: @escaping ((CGFloat) -> ())) {
-        Task {
-            let bgContext =  newBackgroundContext()
-            await bgContext.perform {
-
-                do {
-                    guard let foodItem = try self.foodItemEntity(with: id, context: bgContext) else {
-                        completion(0)
-                        return
-                    }
-                    
-                    completion(foodItem.macrosIndicatorWidth)
-                } catch {
-                    print("Error: \(error)")
-                    completion(0)
                 }
             }
         }

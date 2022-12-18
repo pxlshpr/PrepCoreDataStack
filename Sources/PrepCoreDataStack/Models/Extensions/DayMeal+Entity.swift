@@ -74,7 +74,7 @@ extension DayEntity {
 
 extension MealEntity {
     
-    var macrosIndicatorWidth: CGFloat {
+    var badgeWidth: CGFloat {
         day?.macrosIndicatorWidth(for: energyValueInKcal) ?? 0
     }
     
@@ -87,7 +87,7 @@ extension MealEntity {
 
 extension FoodItemEntity {
     
-    var macrosIndicatorWidth: CGFloat {
+    var badgeWidth: CGFloat {
         guard let dayEntity = meal?.day else {
             return 0
         }
