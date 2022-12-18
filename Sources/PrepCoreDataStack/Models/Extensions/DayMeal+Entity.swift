@@ -28,7 +28,7 @@ extension DayEntity {
     var foodItemEntities: [FoodItemEntity] {
         var entities: [FoodItemEntity] = []
         for mealEntity in mealEntities {
-            entities.append(contentsOf: mealEntity.foodItemEntities)
+            entities.append(contentsOf: mealEntity.nonDeletedFoodItemEntities)
         }
         return entities
     }
@@ -50,7 +50,7 @@ extension DayEntity {
 
     var mealEnergyValuesInKcalDecreasing: [Double] {
         mealEntities
-            .filter { !$0.foodItemEntities.isEmpty }
+            .filter { !$0.nonDeletedFoodItemEntities.isEmpty }
             .map { $0.energyValueInKcal }
             .sorted { $0 > $1 }
     }

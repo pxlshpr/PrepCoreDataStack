@@ -102,11 +102,13 @@ extension FoodItemEntity {
             /// Send notifications for UI to handle the meal change
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 NotificationCenter.default.post(name: .didDeleteFoodItemFromMeal, object: nil, userInfo: [
-                    Notification.Keys.uuid: foodItem.id
+                    Notification.Keys.uuid: foodItem.id,
+                    Notification.Keys.mealId: self.meal!.id!
                 ])
 //                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     NotificationCenter.default.post(name: .didAddFoodItemToMeal, object: nil, userInfo: [
-                        Notification.Keys.foodItem: foodItem
+                        Notification.Keys.foodItem: foodItem,
+                        Notification.Keys.mealId: self.meal!.id!
                     ])
 //                }
             }

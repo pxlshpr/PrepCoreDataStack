@@ -11,7 +11,8 @@ public extension DataManager {
                 name: .didDeleteFoodItemFromMeal,
                 object: nil,
                 userInfo: [
-                    Notification.Keys.uuid: mealFoodItem.id
+                    Notification.Keys.uuid: mealFoodItem.id,
+                    Notification.Keys.mealId: dayMeal.id
                 ]
             )
         }
@@ -33,7 +34,8 @@ public extension DataManager {
                 name: .didAddFoodItemToMeal,
                 object: nil,
                 userInfo: [
-                    Notification.Keys.foodItem: foodItem
+                    Notification.Keys.foodItem: foodItem,
+                    Notification.Keys.mealId: meal.id
                 ]
             )
         }
@@ -51,7 +53,8 @@ public extension DataManager {
                 name: .didUpdateMealFoodItem,
                 object: nil,
                 userInfo: [
-                    Notification.Keys.foodItem: updatedFoodItem
+                    Notification.Keys.foodItem: updatedFoodItem,
+                    Notification.Keys.mealId: updatedFoodItemEntity.meal!.id!
                 ]
             )
         }
@@ -78,7 +81,8 @@ public extension DataManager {
                 name: .didUpdateMealFoodItem,
                 object: nil,
                 userInfo: [
-                    Notification.Keys.foodItem: updatedFoodItem
+                    Notification.Keys.foodItem: updatedFoodItem,
+                    Notification.Keys.mealId: dayMeal.id
                 ]
             )
         }
@@ -138,7 +142,8 @@ public extension DataManager {
                 name: .didAddFoodItemToMeal,
                 object: nil,
                 userInfo: [
-                    Notification.Keys.foodItem: foodItem
+                    Notification.Keys.foodItem: foodItem,
+                    Notification.Keys.mealId: dayMeal.id
                 ]
             )
         }

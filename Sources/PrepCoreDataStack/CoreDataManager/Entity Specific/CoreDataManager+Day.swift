@@ -39,9 +39,42 @@ extension DataManager {
     public func badgeWidth(forFoodItemWithId id: UUID, completion: @escaping ((CGFloat) -> ())) {
         coreDataManager.badgeWidth(forFoodItemWithId: id, completion: completion)
     }
+    
+    public func badgeWidths(for date: Date, completion: @escaping (([UUID : CGFloat]) -> ())) {
+        coreDataManager.badgeWidths(for: date, completion: completion)
+    }
+
 }
 
 extension CoreDataManager {
+    public func badgeWidths(for date: Date, completion: @escaping (([UUID : CGFloat]) -> ())) {
+        Task {
+            let bgContext = newBackgroundContext()
+            await bgContext.perform {
+                do {
+                    
+                    var badgeWidths: [UUID : CGFloat] = [:]
+                    guard let dayEntity = try self.fetchDayEntity(for: date, context: bgContext) else {
+                        completion([:])
+                        return
+                    }
+                    
+                    for mealEntity in dayEntity.mealEntities {
+                        for foodItemEntity in mealEntity.nonDeletedFoodItemEntities {
+                            badgeWidths[foodItemEntity.id!] = foodItemEntity.macrosIndicatorWidth
+                        }
+                    }
+                    
+                    completion(badgeWidths)
+                    
+                } catch {
+                    print("Error: \(error)")
+                    completion([:])
+                }
+            }
+        }
+    }
+
     func badgeWidth(forFoodItemWithId id: UUID, completion: @escaping ((CGFloat) -> ())) {
         Task {
             let bgContext =  newBackgroundContext()
@@ -49,7 +82,8 @@ extension CoreDataManager {
 
                 do {
                     guard let foodItem = try self.foodItemEntity(with: id, context: bgContext) else {
-                        fatalError("Couldn't find food item with id: \(id)")
+                        completion(0)
+                        return
                     }
                     
                     completion(foodItem.macrosIndicatorWidth)

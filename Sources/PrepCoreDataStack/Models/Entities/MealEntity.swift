@@ -56,7 +56,11 @@ extension MealEntity {
     var foodItemEntities: [FoodItemEntity] {
         foodItems?.allObjects as? [FoodItemEntity] ?? []
     }
-    
+
+    var nonDeletedFoodItemEntities: [FoodItemEntity] {
+        foodItemEntities.filter({ $0.deletedAt == 0 })
+    }
+
     var mealFoodItems: [MealFoodItem] {
         foodItemEntities
             .map { MealFoodItem(from: $0) }
