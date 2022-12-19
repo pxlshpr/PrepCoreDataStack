@@ -13,7 +13,16 @@ extension DataManager {
         self.user = User(from: user)
     }
     
+    func userDoesNotExist() throws -> Bool {
+        let user = try coreDataManager.userEntity(context: coreDataManager.viewContext)
+        return user == nil
+    }
+    
     public func createUser(cloudKitId: String) throws {
+        guard try userDoesNotExist() else {
+            throw DataManagerError.userExists
+        }
+        
         /// Create a new user
         //TODO: Feed in the locale here and get init to choose units accordingly
         let user = User(cloudKitId: cloudKitId)

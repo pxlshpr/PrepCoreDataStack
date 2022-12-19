@@ -1,6 +1,7 @@
 import Foundation
 
-enum DataManagerError: Error {
+public enum DataManagerError: Error {
+    case userExists
     case noUserFound
     case noDayFoundWhenInsertingMealFromServer
     

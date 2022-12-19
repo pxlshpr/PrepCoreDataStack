@@ -203,11 +203,11 @@ extension CoreDataManager {
     }
     
     func updatedEntities(completion: ((UpdatedEntities) -> ())) {
+        
         let bgContext = newBackgroundContext()
         do {
             try bgContext.performAndWait {
-                
-                /// Only fetch things that have an `updatedAt` later than `versionTimestamp`
+
                 let userRequest = NSFetchRequest<UserEntity>(entityName: "UserEntity")
                 userRequest.predicate = NSPredicate(format: "syncStatus == %d", SyncStatus.notSynced.rawValue)
                 let userEntity = try bgContext.fetch(userRequest).first
