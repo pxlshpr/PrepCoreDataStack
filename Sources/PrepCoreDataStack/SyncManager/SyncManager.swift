@@ -48,6 +48,7 @@ public class SyncManager {
         }
 
         Task {
+            pause()
             do {
                 
                 //TODO: Mark objects being synced as pending so we don't re-fetch them during the sync
@@ -63,6 +64,7 @@ public class SyncManager {
             } catch {
                 print("◽️⚠️ SyncError: \(error)")
             }
+            resume()
         }
     }
     
