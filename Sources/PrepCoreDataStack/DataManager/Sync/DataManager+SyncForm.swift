@@ -451,6 +451,8 @@ extension DataManager {
         /// Check that it has a deleted at timestamp **and** belongs to a meal (as we do not hard delete food items that are children of others (since these represent past recipes and plates, which we want to keep around)
         if let deletedAt = serverFoodItem.deletedAt, deletedAt > 0, serverFoodItem.meal != nil {
             shouldDelete = true
+        } else if let mealDeletedAt = serverFoodItem.meal?.deletedAt, mealDeletedAt > 0 {
+            shouldDelete = true
         } else {
             shouldDelete = false
         }
@@ -610,12 +612,12 @@ extension DataManager {
         
         if let deletedAt = serverMeal.deletedAt, deletedAt > 0 {
             
-            print("🗑 Deleting Meal")
+            print("🗑 Deleting Meal: \(serverMeal.id) \(serverMeal.name) on \(serverMeal.day.date.calendarDayString)")
             try coreDataManager.hardDeleteMealEntity(with: serverMeal.id, context: context)
             
         } else if let meal = try coreDataManager.mealEntity(with: serverMeal.id, context: context) {
             
-            print("📝 Updating existing Meal")
+            print("📝 Updating existing Meal: \(serverMeal.id) \(serverMeal.name) on \(serverMeal.day.date.calendarDayString)")
             try meal.update(
                 with: serverMeal,
                 goalSetEntity: goalSetEntity,
@@ -646,7 +648,7 @@ extension DataManager {
                 dayEntity: dayEntity,
                 goalSetEntity: goalSetEntity
             )
-            print("✨ Creating Meal")
+            print("✨ Creating Meal: \(serverMeal.id) \(serverMeal.name) on \(serverMeal.day.date.calendarDayString)")
             context.insert(mealEntity)
         }
         
