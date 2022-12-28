@@ -9,6 +9,7 @@ public class NetworkManager {
         case sync
         case backup
         case fastingActivity
+        case presetFoodsSearch
         
         var path: String {
             switch self {
@@ -18,6 +19,8 @@ public class NetworkManager {
                 return "backup"
             case .fastingActivity:
                 return "fastingActivity"
+            case .presetFoodsSearch:
+                return "presetFoods/searchFull"
             }
         }
     }
