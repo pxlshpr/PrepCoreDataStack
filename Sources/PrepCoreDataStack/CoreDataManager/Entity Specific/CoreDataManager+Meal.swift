@@ -108,25 +108,123 @@ extension CoreDataManager {
 
 extension CoreDataManager {
     func latestMealBeforeNow() throws -> MealEntity? {
-        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
-        request.predicate = NSPredicate(
-//            format: "(time < %f) AND (ANY foodItems.markedAsEatenAt > 0)", Date().timeIntervalSince1970
-            format: "time < %f AND deletedAt == 0", Date().timeIntervalSince1970
-        )
-        request.sortDescriptors = [
-            NSSortDescriptor(keyPath: \MealEntity.time, ascending: false),
-        ]
-        return try viewContext.fetch(request).first
+        try latestMealBefore(Date())
+//        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+//        request.predicate = NSPredicate(
+//            format: "time < %f AND deletedAt == 0", Date().timeIntervalSince1970
+//        )
+//        request.sortDescriptors = [
+//            NSSortDescriptor(keyPath: \MealEntity.time, ascending: false),
+//        ]
+//        return try viewContext.fetch(request).first
     }
     
     func earliestMealAfterNow() throws -> MealEntity? {
+        try earliestMealAfter(Date())
+//        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+//        request.predicate = NSPredicate(
+//            format: "time > %f AND deletedAt == 0", Date().timeIntervalSince1970
+//        )
+//        request.sortDescriptors = [
+//            NSSortDescriptor(keyPath: \MealEntity.time, ascending: true),
+//        ]
+//        return try viewContext.fetch(request).first
+    }
+
+    func getLatestMeal(before time: Date, completion: @escaping ((MealEntity?) -> ())) throws {
+        Task {
+            let bgContext =  newBackgroundContext()
+            await bgContext.perform {
+
+                do {
+                    guard let meal = try self.latestMealBefore(time, context: bgContext) else {
+                        completion(nil)
+                        return
+                    }
+                    completion(meal)
+                } catch {
+                    print("Error: \(error)")
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
+    func getNextMeal(after time: Date, completion: @escaping ((MealEntity?) -> ())) throws {
+        Task {
+            let bgContext =  newBackgroundContext()
+            await bgContext.perform {
+
+                do {
+                    guard let meal = try self.earliestMealAfter(time, context: bgContext) else {
+                        completion(nil)
+                        return
+                    }
+                    completion(meal)
+                } catch {
+                    print("Error: \(error)")
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
+    func getMealsWithTime(on date: Date, completion: @escaping (([MealEntity]) -> ())) throws {
+        Task {
+            let bgContext =  newBackgroundContext()
+            await bgContext.perform {
+
+                do {
+                    let meals = try self.mealsWithTime(on: date, context: bgContext)
+                    completion(meals)
+                } catch {
+                    print("Error: \(error)")
+                    completion([])
+                }
+            }
+        }
+    }
+
+    func mealsWithTime(on date: Date, context: NSManagedObjectContext? = nil) throws -> [MealEntity] {
+        let context = context ?? viewContext
         let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
         request.predicate = NSPredicate(
-            format: "time > %f AND deletedAt == 0", Date().timeIntervalSince1970
+//            format: "(time < %f) AND (ANY foodItems.markedAsEatenAt > 0)", Date().timeIntervalSince1970
+            format: "time > %f AND time < %f AND deletedAt == 0",
+            date.startOfDay.timeIntervalSince1970,
+            date.endOfDay.timeIntervalSince1970
         )
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \MealEntity.time, ascending: true),
         ]
-        return try viewContext.fetch(request).first
+        return try context.fetch(request)
     }
+
+    
+    func earliestMealAfter(_ time: Date, context: NSManagedObjectContext? = nil) throws -> MealEntity? {
+        let context = context ?? viewContext
+        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+        request.predicate = NSPredicate(
+            format: "time > %f AND deletedAt == 0", time.timeIntervalSince1970
+        )
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \MealEntity.time, ascending: true),
+        ]
+        return try context.fetch(request).first
+    }
+
+    
+    func latestMealBefore(_ time: Date, context: NSManagedObjectContext? = nil) throws -> MealEntity? {
+        let context = context ?? viewContext
+        let request = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+        request.predicate = NSPredicate(
+//            format: "(time < %f) AND (ANY foodItems.markedAsEatenAt > 0)", Date().timeIntervalSince1970
+            format: "time < %f AND deletedAt == 0", time.timeIntervalSince1970 - 60
+        )
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \MealEntity.time, ascending: false),
+        ]
+        return try context.fetch(request).first
+    }
+
 }

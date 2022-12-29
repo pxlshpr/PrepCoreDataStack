@@ -60,23 +60,76 @@ public extension DataManager {
             guard let meal = try coreDataManager.latestMealBeforeNow() else {
                 return nil
             }
-            print("Last Meal: \(meal.name!) at \(meal.time)")
             return Date(timeIntervalSince1970: meal.time)
         } catch {
-            print("Error getting last meal: \(error)")
             return nil
         }
     }
+    
+    func getLastMeal(before time: Date) async throws -> DayMeal? {
+        try await withCheckedThrowingContinuation { continuation in
+            do {
+                try coreDataManager.getLatestMeal(before: time) { mealEntity in
+                    guard let mealEntity else {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    let meal = DayMeal(from: mealEntity)
+                    continuation.resume(returning: meal)
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+    
+    func getNextMeal(after time: Date) async throws -> DayMeal? {
+        try await withCheckedThrowingContinuation { continuation in
+            do {
+                try coreDataManager.getNextMeal(after: time) { mealEntity in
+                    guard let mealEntity else {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    let meal = DayMeal(from: mealEntity)
+                    continuation.resume(returning: meal)
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+
+    func getMealsWithTime(on date: Date) async throws -> [DayMeal] {
+        try await withCheckedThrowingContinuation { continuation in
+            do {
+                try coreDataManager.getMealsWithTime(on: date) { mealEntities in
+                    continuation.resume(returning: mealEntities.map { DayMeal(from: $0) })
+                }
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+
+//    func lastMealTimeBefore(_ time: Date) -> Date? {
+//        do {
+//            guard let meal = try coreDataManager.latestMealBefore(time) else {
+//                return nil
+//            }
+//            return Date(timeIntervalSince1970: meal.time)
+//        } catch {
+//            return nil
+//        }
+//    }
     
     var nextMeal: DayMeal? {
         do {
             guard let mealEntity = try coreDataManager.earliestMealAfterNow() else {
                 return nil
             }
-            print("Next Meal: \(mealEntity.name!) at \(mealEntity.time)")
             return DayMeal(from: mealEntity)
         } catch {
-            print("Error getting next meal: \(error)")
             return nil
         }
     }
