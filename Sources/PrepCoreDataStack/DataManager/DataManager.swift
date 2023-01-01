@@ -44,7 +44,17 @@ public class DataManager: ObservableObject {
             self, selector: #selector(didUpdateFoods),
             name: .didUpdateFoods, object: nil
         )
-        
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didAddFoodItemToMeal),
+            name: .didAddFoodItemToMeal, object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didUpdateMealFoodItem),
+            name: .didUpdateMealFoodItem, object: nil
+        )
+
         NotificationCenter.default.addObserver(
             self, selector: #selector(didUpdateGoalSets),
             name: .didUpdateGoalSets, object: nil

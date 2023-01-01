@@ -147,10 +147,22 @@ public extension DataManager {
         }
     }
     
-    @objc func didUpdateFoods(notification: Notification) {
+    func reloadFoods() {
         DispatchQueue.main.async {
             self.loadMyFoods()
         }
+    }
+    
+    @objc func didUpdateFoods(notification: Notification) {
+        reloadFoods()
+    }
+
+    @objc func didAddFoodItemToMeal(notification: Notification) {
+        reloadFoods()
+    }
+
+    @objc func didUpdateMealFoodItem(notification: Notification) {
+        reloadFoods()
     }
 
     @objc func didUpdateGoalSets(notification: Notification) {

@@ -14,7 +14,9 @@ extension CoreDataManager {
             throw CoreDataManagerError.missingMeal
         }
         
-        //TODO: Submit sortPosition here after incrementing it
+        foodEntity.lastUsedAt = Date().timeIntervalSince1970
+        
+        //TODO: Submit sortPosition here after incrementing it (Note: this might have expired)
         let foodItemEntity = FoodItemEntity(
             context: viewContext,
             mealFoodItem: mealFoodItem,
@@ -40,7 +42,9 @@ extension CoreDataManager {
         guard let foodEntity = try foodEntity(with: mealFoodItem.food.id, context: viewContext) else {
             throw CoreDataManagerError.missingFood
         }
-        
+
+        foodEntity.lastUsedAt = Date().timeIntervalSince1970
+
         guard let mealEntity = try mealEntity(with: mealId, context: viewContext) else {
             throw CoreDataManagerError.missingMeal
         }

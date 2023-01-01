@@ -20,7 +20,21 @@ extension DataManager: SearchDataProvider {
     public var recentFoods: [Food] {
         Array(
             myFoods
-                .sorted(by: { $0.updatedAt > $1.updatedAt })
+                .sorted(by: {
+                    let lhs: TimeInterval
+                    let rhs: TimeInterval
+                    if let lastUsedAt = $0.lastUsedAt, lastUsedAt > 0 {
+                        lhs = lastUsedAt
+                    } else {
+                        lhs = $0.updatedAt
+                    }
+                    if let lastUsedAt = $1.lastUsedAt, lastUsedAt > 0 {
+                        rhs = lastUsedAt
+                    } else {
+                        rhs = $1.updatedAt
+                    }
+                    return lhs > rhs
+                })
                 .prefix(5)
         )
     }
