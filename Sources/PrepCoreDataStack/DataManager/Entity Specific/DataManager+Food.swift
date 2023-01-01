@@ -111,6 +111,19 @@ public extension DataManager {
             }
         }
     }
+    
+    func lastUsedQuantity(for food: Food) -> FoodQuantity? {
+        do {
+            guard let foodItemEntity = try coreDataManager.lastUsedFoodItemEntity(forFoodWithId: food.id) else {
+                return nil
+            }
+            let foodItem = FoodItem(from: foodItemEntity)
+            return foodItem.food.quantity(for: foodItem.amount)
+        } catch {
+            print("Error getting lastUsedQuantity")
+            return nil
+        }
+    }
 
 //    func lastMealTimeBefore(_ time: Date) -> Date? {
 //        do {

@@ -29,7 +29,21 @@ extension CoreDataManager {
 //        request.predicate = NSPredicate(format: "calendarDayString IN %@", range.calendarDayStrings)
         return try context.fetch(request)
     }
+    
+    func lastUsedFoodItemEntity(forFoodWithId foodId: UUID, context: NSManagedObjectContext? = nil) throws -> FoodItemEntity? {
+        let context = context ?? viewContext
+        let request: NSFetchRequest<FoodItemEntity> = FoodItemEntity.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "food.id == %@ AND meal != NULL", foodId.uuidString)
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \FoodItemEntity.meal?.time, ascending: false),
+        ]
+        request.fetchLimit = 1
+
+        return try context.fetch(request).first
+    }
 }
+
 extension CoreDataManager {
     func myFoodEntities(completion: @escaping (([FoodEntity]) -> ())) throws {
         Task {
