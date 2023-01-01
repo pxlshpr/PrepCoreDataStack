@@ -247,7 +247,7 @@ extension DataManager {
                 guard entity.pushToken! == pushToken else {
                     fatalError("New pushToken wasn't saved")
                 }
-                print("Updating existing FastingActivity")
+                print("\(Date().timeIntervalSince1970) Updating existing FastingActivity")
                 try coreDataManager.updateFastingActivityEntity(entity, with: fastingTimerState)
             } else {
                 print("Creating a new FastingActivity")
